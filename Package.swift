@@ -5,7 +5,9 @@ import PackageDescription
 
 let package = Package(
     name: "AMCameraScanner",
-    platforms: [.iOS("12.0")],
+    platforms: [
+        .iOS(.v13)
+    ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
@@ -22,6 +24,11 @@ let package = Package(
         .target(
             name: "AMCameraScanner",
             dependencies: [],
-            path: "Sources"),
+            path: "Sources",
+            exclude: ["Info.plist"],
+            resources: [
+                .process("Info.plist"),
+                .process("CompiledModels")
+            ]),
     ]
 )
