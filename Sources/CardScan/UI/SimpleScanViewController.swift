@@ -56,7 +56,7 @@ import UIKit
 // this code and customize it to fit your needs -- we're fine with whatever makes
 // the most sense for your app.
 
-protocol SimpleScanDelegate: AnyObject {
+public protocol SimpleScanDelegate: AnyObject {
     func userDidCancelSimple(_ scanViewController: SimpleScanViewController)
     func userDidScanCardSimple(_ scanViewController: SimpleScanViewController, creditCard: CreditCard)
     func userDidScanQR(_ code: String)
@@ -109,7 +109,7 @@ public class SimpleScanViewController: ScanBaseViewController {
     static var torchButtonString = "String.Localized.torch"
     static var privacyLinkString = "String.Localized.scanCardExpectedPrivacyLinkText()"
 
-    weak var delegate: SimpleScanDelegate?
+    public weak var delegate: SimpleScanDelegate?
     var scanPerformancePriority: ScanPerformance = .fast
     var maxErrorCorrectionDuration: Double = 4.0
 
