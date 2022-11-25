@@ -75,15 +75,15 @@ public class CardScanSheet {
 }
 
 extension CardScanSheet: SimpleScanDelegate {
-    func userDidScanQR(_ code: String) {
+    public func userDidScanQR(_ code: String) {
         completion?(.completed(qr: code))
     }
 
-    func userDidCancelSimple(_ scanViewController: SimpleScanViewController) {
+    public func userDidCancelSimple(_ scanViewController: SimpleScanViewController) {
         completion?(.canceled)
     }
 
-    func userDidScanCardSimple(
+    public func userDidScanCardSimple(
         _ scanViewController: SimpleScanViewController,
         creditCard: CreditCard
     ) {

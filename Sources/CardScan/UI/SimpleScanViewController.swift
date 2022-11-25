@@ -132,7 +132,7 @@ public class SimpleScanViewController: ScanBaseViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
 
         setupUiComponents()
@@ -159,7 +159,7 @@ public class SimpleScanViewController: ScanBaseViewController {
     //  Targets gets added on every setUpUi call.
     //
     //  Figure out a better way of allow custom buttons programmatically instead of whole UI buttons.
-    override func viewDidDisappear(_ animated: Bool) {
+    public override func viewDidDisappear(_ animated: Bool) {
         closeButton.removeTarget(self, action: #selector(cancelButtonPress), for: .touchUpInside)
         torchButton.removeTarget(self, action: #selector(torchButtonPress), for: .touchUpInside)
     }
