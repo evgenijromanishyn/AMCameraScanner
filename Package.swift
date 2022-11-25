@@ -1,4 +1,4 @@
-// swift-tools-version: 5.6
+// swift-tools-version: 5.4
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -28,7 +28,7 @@ let package = Package(
             exclude: ["Info.plist"],
             resources: [
                 .process("Info.plist"),
-                .process("CompiledModels")
+                .process("Resources/CompiledModels")
             ]),
     ]
 )
