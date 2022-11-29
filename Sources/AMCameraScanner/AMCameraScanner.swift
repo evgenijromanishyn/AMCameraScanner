@@ -104,7 +104,7 @@ public class AMCameraScanner: ScanBaseViewController {
     var expiryLayoutView = UIView()
 
     // String
-    static var descriptionString = "String.Localized.scan_card_title_capitalization"
+    static var descriptionString = "scan_card_title_capitalization"
     static var enableCameraPermissionString = "String.Localized.enable_camera_access"
     static var enableCameraPermissionsDescriptionString = "String.Localized.update_phone_settings"
     static var privacyLinkString = "String.Localized.scanCardExpectedPrivacyLinkText()"
