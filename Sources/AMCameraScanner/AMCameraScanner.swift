@@ -382,7 +382,7 @@ public class AMCameraScanner: ScanBaseViewController {
             true
         descriptionText.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -32)
             .isActive = true
-        descriptionText.topAnchor.constraint(equalTo: expiryLayoutView.bottomAnchor, constant: -24).isActive =
+        descriptionText.topAnchor.constraint(equalTo: expiryLayoutView.bottomAnchor, constant: 24).isActive =
             true
     }
 
