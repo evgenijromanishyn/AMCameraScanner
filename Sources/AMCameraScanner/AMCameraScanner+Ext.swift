@@ -33,4 +33,11 @@ public extension AMCameraScanner {
         }
     }
 
+    var scanDescription: String? {
+        get {
+            descriptionText.text
+        } set {
+            descriptionText.text = newValue
+        }
+    }
 }

@@ -104,7 +104,6 @@ public class AMCameraScanner: ScanBaseViewController {
     var expiryLayoutView = UIView()
 
     // String
-    static var descriptionString = "scan_card_title_capitalization"
     static var enableCameraPermissionString = "String.Localized.enable_camera_access"
     static var enableCameraPermissionsDescriptionString = "String.Localized.update_phone_settings"
     static var privacyLinkString = "String.Localized.scanCardExpectedPrivacyLinkText()"
@@ -231,10 +230,10 @@ public class AMCameraScanner: ScanBaseViewController {
     }
 
     func setupDescriptionTextUi() {
-        descriptionText.text = AMCameraScanner.descriptionString
         descriptionText.textColor = .white
         descriptionText.textAlignment = .center
         descriptionText.font = descriptionText.font.withSize(30)
+        descriptionText.numberOfLines = 0
     }
 
     func setupCardDetailsUi() {
