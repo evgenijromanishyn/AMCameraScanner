@@ -75,7 +75,7 @@ public class AMCameraScanner: ScanBaseViewController {
     var privacyLinkText = UITextView()
     var privacyLinkTextHeightConstraint: NSLayoutConstraint? = nil
 
-    private var closeButton: UIButton = {
+    var closeButton: UIButton = {
         var button = UIButton(type: .system)
         button.setTitleColor(.white, for: .normal)
         button.tintColor = .white
