@@ -232,7 +232,7 @@ public class AMCameraScanner: ScanBaseViewController {
     func setupDescriptionTextUi() {
         descriptionText.textColor = .white
         descriptionText.textAlignment = .center
-        descriptionText.font = descriptionText.font.withSize(16)
+        descriptionText.font = descriptionText.font.withSize(13)
         descriptionText.numberOfLines = 0
     }
 
