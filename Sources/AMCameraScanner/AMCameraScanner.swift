@@ -75,14 +75,14 @@ public class AMCameraScanner: ScanBaseViewController {
     var privacyLinkText = UITextView()
     var privacyLinkTextHeightConstraint: NSLayoutConstraint? = nil
 
-    var closeButton: UIButton = {
+    private var closeButton: UIButton = {
         var button = UIButton(type: .system)
         button.setTitleColor(.white, for: .normal)
         button.tintColor = .white
         return button
     }()
 
-    var torchButton: UIButton = {
+    private(set) var torchButton: UIButton = {
         var button = UIButton(type: .system)
         button.setTitleColor(.white, for: .normal)
         button.tintColor = .white
@@ -370,6 +370,8 @@ public class AMCameraScanner: ScanBaseViewController {
         torchButton.bottomAnchor.constraint(equalTo: margins.bottomAnchor, constant: -36).isActive =
             true
         torchButton.leadingAnchor.constraint(equalTo: margins.leadingAnchor).isActive = true
+        torchButton.heightAnchor.constraint(equalToConstant: 48).isActive = true
+        torchButton.widthAnchor.constraint(equalToConstant: 48).isActive = true
     }
 
     func setupDescriptionTextConstraints() {
