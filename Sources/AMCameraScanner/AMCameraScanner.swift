@@ -232,7 +232,7 @@ public class AMCameraScanner: ScanBaseViewController {
     func setupDescriptionTextUi() {
         descriptionText.textColor = .white
         descriptionText.textAlignment = .center
-        descriptionText.font = descriptionText.font.withSize(30)
+        descriptionText.font = descriptionText.font.withSize(16)
         descriptionText.numberOfLines = 0
     }
 
@@ -382,7 +382,7 @@ public class AMCameraScanner: ScanBaseViewController {
             true
         descriptionText.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -32)
             .isActive = true
-        descriptionText.bottomAnchor.constraint(equalTo: roiView.topAnchor, constant: -16).isActive =
+        descriptionText.topAnchor.constraint(equalTo: roiView.topAnchor, constant: -24).isActive =
             true
     }
 

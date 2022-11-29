@@ -251,15 +251,12 @@ public class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputS
         #endif
     }
 
-    func setupOnViewDidLoad(
-        regionOfInterestLabel: UIView,
-        blurView: BlurView,
-        previewView: PreviewView,
-        cornerView: CornerView?,
-        debugImageView: UIImageView?,
-        torchLevel: Float?
-    ) {
-
+    func setupOnViewDidLoad( regionOfInterestLabel: UIView,
+                             blurView: BlurView,
+                             previewView: PreviewView,
+                             cornerView: CornerView?,
+                             debugImageView: UIImageView?,
+                             torchLevel: Float?) {
         self.regionOfInterestLabel = regionOfInterestLabel
         self.blurView = blurView
         self.previewView = previewView
@@ -486,11 +483,9 @@ public class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputS
         )
     }
 
-    func prediction(
-        prediction: CreditCardOcrPrediction,
-        imageData: ScannedCardImageData,
-        state: MainLoopState
-    ) {
+    func prediction(prediction: CreditCardOcrPrediction,
+                    imageData: ScannedCardImageData,
+                    state: MainLoopState) {
         if !firstImageProcessed {
             firstImageProcessed = true
         }
