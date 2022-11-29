@@ -48,7 +48,7 @@ public class CardScanSheet {
             return
         }
 
-        let vc = SimpleScanViewController()
+        let vc = AMCameraScanner()
         vc.delegate = self
 
         // Overwrite completion closure to retain self until called
@@ -74,17 +74,17 @@ public class CardScanSheet {
     var completion: ((CardScanSheetResult) -> Void)?
 }
 
-extension CardScanSheet: SimpleScanDelegate {
+extension CardScanSheet: AMCameraScannerDelegate {
     public func userDidScanQR(_ code: String) {
         completion?(.completed(qr: code))
     }
 
-    public func userDidCancelSimple(_ scanViewController: SimpleScanViewController) {
+    public func userDidCancelSimple(_ scanViewController: AMCameraScanner) {
         completion?(.canceled)
     }
 
     public func userDidScanCardSimple(
-        _ scanViewController: SimpleScanViewController,
+        _ scanViewController: AMCameraScanner,
         creditCard: CreditCard
     ) {
         let scannedCard = ScannedCard(pan: creditCard.number)

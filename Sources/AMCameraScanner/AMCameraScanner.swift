@@ -1,506 +1,543 @@
-import AVKit
+
 import UIKit
-import Vision
 
-public class AMCameraScanner: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate,
-                              AfterPermissions, OcrMainLoopDelegate {
-    var includeCardImage = false
-    var showDebugImageView = false
+// This class is all programmatic UI with a small bit of logic to handle
+// the events that ScanBaseViewController expects subclasses to implement.
+// Our goal is to have a fully featured Card Scan implementation with a
+// minimal UI that people can customize fully. You can use this directly or
+// you can subclass and customize it. If you'd like to use an off-the-shelf
+// design as well, we suggest using the `ScanViewController`, which uses
+// mature and well tested UI design patterns.
+//
+// The default UI looks something like this, with most of the constraints
+// shown:
+//
+// ------------------------------------
+// |   |                          |   |
+// |-Cancel                     Torch-|
+// |                                  |
+// |                                  |
+// |                                  |
+// |                                  |
+// |                                  |
+// |------------Scan Card-------------|
+// |                |                 |
+// |  ------------------------------  |
+// | |                              | |
+// | |                              | |
+// | |                              | |
+// | |--4242    4242   4242   4242--| |
+// | ||           05/23             | |
+// | ||-Sam King                    | |
+// | |     |                        | |
+// |  ------------------------------  |
+// | |              |               | |
+// | |              |               | |
+// | |   Enable camera permissions  | |
+// | |              |               | |
+// | |              |               | |
+// | |---To scan your card you...---| |
+// |                                  |
+// |                                  |
+// |                                  |
+// ------------------------------------
+//
+// For the UI we separate out the key components into three parts:
+// - Five `*String` variables that we use to set the copy
+// - For each component or group of components we have:
+//   - `setup*Ui` functions for setting the visual look and feel
+//   - `setup*Constraints for setting up autolayout
+// - We have top level `setupUiComponents` and `setupConstraints` functions that do
+//   a small bit of setup and call the appropriate setup functions for each
+//   components
+//
+// And to customize the UI you can either override any of these functions or you
+// can access components directly to adjust. Also, you're welcome to copy and paste
+// this code and customize it to fit your needs -- we're fine with whatever makes
+// the most sense for your app.
 
-    var scanEventsDelegate: ScanEvents?
+public protocol AMCameraScannerDelegate: AnyObject {
+    func userDidCancelSimple(_ scanViewController: AMCameraScanner)
+    func userDidScanCardSimple(_ scanViewController: AMCameraScanner, creditCard: CreditCard)
+    func userDidScanQR(_ code: String)
+}
 
-    static var isAppearing = false
-    static var isPadAndFormsheet: Bool = false
-    static let machineLearningQueue = DispatchQueue(label: "CardScanMlQueue")
-    private let machineLearningSemaphore = DispatchSemaphore(value: 1)
+public class AMCameraScanner: ScanBaseViewController {
 
-    private weak var debugImageView: UIImageView?
-    private weak var previewView: PreviewView?
-    private weak var regionOfInterestLabel: UIView?
-    private weak var blurView: BlurView?
-    private weak var cornerView: CornerView?
-    private var regionOfInterestLabelFrame: CGRect?
-    private var previewViewFrame: CGRect?
+    // used by ScanBase
+    var previewView: PreviewView = PreviewView()
+    var blurView: BlurView = BlurView()
+    var roiView: UIView = UIView()
+    var cornerView: CornerView?
 
-    var videoFeed = VideoFeed()
-    var initialVideoOrientation: AVCaptureVideoOrientation {
-        if ScanBaseViewController.isPadAndFormsheet {
-            return AVCaptureVideoOrientation(interfaceOrientation: UIWindow.interfaceOrientation)
-                ?? .portrait
+    // our UI components
+    var descriptionText = UILabel()
+    var privacyLinkText = UITextView()
+    var privacyLinkTextHeightConstraint: NSLayoutConstraint? = nil
+
+    var closeButton: UIButton = {
+        var button = UIButton(type: .system)
+        button.setTitleColor(.white, for: .normal)
+        button.tintColor = .white
+        button.setTitle(AMCameraScanner.closeButtonString, for: .normal)
+        return button
+    }()
+
+    var torchButton: UIButton = {
+        var button = UIButton(type: .system)
+        button.setTitleColor(.white, for: .normal)
+        button.tintColor = .white
+        button.setTitle(AMCameraScanner.torchButtonString, for: .normal)
+        return button
+    }()
+
+    private var debugView: UIImageView?
+    var enableCameraPermissionsButton = UIButton(type: .system)
+    var enableCameraPermissionsText = UILabel()
+
+    // Dynamic card details
+    var numberText = UILabel()
+    var expiryText = UILabel()
+    var nameText = UILabel()
+    var expiryLayoutView = UIView()
+
+    // String
+    static var descriptionString = "String.Localized.scan_card_title_capitalization"
+    static var enableCameraPermissionString = "String.Localized.enable_camera_access"
+    static var enableCameraPermissionsDescriptionString = "String.Localized.update_phone_settings"
+    static var closeButtonString = "String.Localized.close"
+    static var torchButtonString = "String.Localized.torch"
+    static var privacyLinkString = "String.Localized.scanCardExpectedPrivacyLinkText()"
+
+    public weak var delegate: AMCameraScannerDelegate?
+    var scanPerformancePriority: ScanPerformance = .fast
+    var maxErrorCorrectionDuration: Double = 4.0
+
+    // MARK: Inits
+    public override init() {
+        super.init()
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            // For the iPad you can use the full screen style but you have to select "requires full screen" in
+            // the Info.plist to lock it in portrait mode. For iPads, we recommend using a formSheet, which
+            // handles all orientations correctly.
+            self.modalPresentationStyle = .formSheet
         } else {
-            return .portrait
+            self.modalPresentationStyle = .fullScreen
         }
     }
 
-    var scannedCardImage: UIImage?
-    private var isNavigationBarHidden: Bool?
-    var hideNavigationBar: Bool?
-    var regionOfInterestCornerRadius = CGFloat(10.0)
-    private var calledOnScannedCard = false
-
-    /// Flag to keep track of first time pan is observed
-    private var firstPanObserved: Bool = false
-    /// Flag to keep track of first time frame is processed
-    private var firstImageProcessed: Bool = false
-
-    var mainLoop: MachineLearningLoop?
-    private func ocrMainLoop() -> OcrMainLoop? {
-        mainLoop.flatMap { $0 as? OcrMainLoop }
+    required init?(
+        coder: NSCoder
+    ) {
+        fatalError("init(coder:) has not been implemented")
     }
-    // this is a hack to avoid changing our  interface
-    var predictedName: String?
 
-    // Child classes should override these functions
-    func onScannedCard(
+    public override func viewDidLoad() {
+        super.viewDidLoad()
+
+        setupUiComponents()
+        setupConstraints()
+
+        setupOnViewDidLoad(
+            regionOfInterestLabel: roiView,
+            blurView: blurView,
+            previewView: previewView,
+            cornerView: cornerView,
+            debugImageView: debugView,
+            torchLevel: 1.0
+        )
+
+        if #available(iOS 13.0, *) {
+            setUpMainLoop(errorCorrectionDuration: maxErrorCorrectionDuration)
+        }
+
+        startCameraPreview()
+    }
+
+    //  Removing targets manually since we are allowing custom buttons which retains button reference ->
+    //  ARC doesn't automatically decrement its reference count ->
+    //  Targets gets added on every setUpUi call.
+    //
+    //  Figure out a better way of allow custom buttons programmatically instead of whole UI buttons.
+    public override func viewDidDisappear(_ animated: Bool) {
+        closeButton.removeTarget(self, action: #selector(cancelButtonPress), for: .touchUpInside)
+        torchButton.removeTarget(self, action: #selector(torchButtonPress), for: .touchUpInside)
+    }
+
+    @available(iOS 13.0, *)
+    func setUpMainLoop(errorCorrectionDuration: Double) {
+        if scanPerformancePriority == .accurate {
+            let mainLoop = self.mainLoop as? OcrMainLoop
+            mainLoop?.errorCorrection = ErrorCorrection(
+                stateMachine: OcrAccurateMainLoopStateMachine(
+                    maxErrorCorrection: maxErrorCorrectionDuration
+                )
+            )
+        }
+    }
+
+    // MARK: -Visual and UI event setup for UI components
+    func setupUiComponents() {
+        view.backgroundColor = .white
+        regionOfInterestCornerRadius = 15.0
+
+        let children: [UIView] = [
+            previewView, blurView, roiView, descriptionText, closeButton, torchButton, numberText,
+            expiryText, nameText, expiryLayoutView, enableCameraPermissionsButton,
+            enableCameraPermissionsText, privacyLinkText,
+        ]
+        for child in children {
+            self.view.addSubview(child)
+        }
+
+        setupPreviewViewUi()
+        setupBlurViewUi()
+        setupRoiViewUi()
+        setupCloseButtonUi()
+        setupTorchButtonUi()
+        setupDescriptionTextUi()
+        setupCardDetailsUi()
+        setupDenyUi()
+        setupPrivacyLinkTextUi()
+
+        if showDebugImageView {
+            setupDebugViewUi()
+        }
+    }
+
+    func setupPreviewViewUi() {
+        // no ui setup
+    }
+
+    func setupBlurViewUi() {
+        blurView.backgroundColor = #colorLiteral(
+            red: 0.2411109507,
+            green: 0.271378696,
+            blue: 0.3280351758,
+            alpha: 0.7020547945
+        )
+    }
+
+    func setupRoiViewUi() {
+        roiView.layer.borderColor = UIColor.white.cgColor
+    }
+
+    func setupCloseButtonUi() {
+        closeButton.addTarget(self, action: #selector(cancelButtonPress), for: .touchUpInside)
+    }
+
+    func setupTorchButtonUi() {
+        torchButton.addTarget(self, action: #selector(torchButtonPress), for: .touchUpInside)
+    }
+
+    func setupDescriptionTextUi() {
+        descriptionText.text = AMCameraScanner.descriptionString
+        descriptionText.textColor = .white
+        descriptionText.textAlignment = .center
+        descriptionText.font = descriptionText.font.withSize(30)
+    }
+
+    func setupCardDetailsUi() {
+        numberText.isHidden = true
+        numberText.textColor = .white
+        numberText.textAlignment = .center
+        numberText.font = numberText.font.withSize(48)
+        numberText.adjustsFontSizeToFitWidth = true
+        numberText.minimumScaleFactor = 0.2
+
+        expiryText.isHidden = true
+        expiryText.textColor = .white
+        expiryText.textAlignment = .center
+        expiryText.font = expiryText.font.withSize(20)
+
+        nameText.isHidden = true
+        nameText.textColor = .white
+        nameText.font = expiryText.font.withSize(20)
+    }
+
+    func setupDenyUi() {
+        let text = AMCameraScanner.enableCameraPermissionString
+        let attributedString = NSMutableAttributedString(string: text)
+        attributedString.addAttribute(
+            NSAttributedString.Key.underlineColor,
+            value: UIColor.white,
+            range: NSRange(location: 0, length: text.count)
+        )
+        attributedString.addAttribute(
+            NSAttributedString.Key.foregroundColor,
+            value: UIColor.white,
+            range: NSRange(location: 0, length: text.count)
+        )
+        attributedString.addAttribute(
+            NSAttributedString.Key.underlineStyle,
+            value: NSUnderlineStyle.single.rawValue,
+            range: NSRange(location: 0, length: text.count)
+        )
+        let font =
+            enableCameraPermissionsButton.titleLabel?.font.withSize(20)
+            ?? UIFont.systemFont(ofSize: 20.0)
+        attributedString.addAttribute(
+            NSAttributedString.Key.font,
+            value: font,
+            range: NSRange(location: 0, length: text.count)
+        )
+        enableCameraPermissionsButton.setAttributedTitle(attributedString, for: .normal)
+        enableCameraPermissionsButton.isHidden = true
+
+        enableCameraPermissionsButton.addTarget(
+            self,
+            action: #selector(enableCameraPermissionsPress),
+            for: .touchUpInside
+        )
+
+        enableCameraPermissionsText.text =
+        AMCameraScanner.enableCameraPermissionsDescriptionString
+        enableCameraPermissionsText.textColor = .white
+        enableCameraPermissionsText.textAlignment = .center
+        enableCameraPermissionsText.font = enableCameraPermissionsText.font.withSize(17)
+        enableCameraPermissionsText.numberOfLines = 3
+        enableCameraPermissionsText.isHidden = true
+    }
+
+    func setupPrivacyLinkTextUi() {
+        privacyLinkText.textColor = .white
+        privacyLinkText.textAlignment = .center
+        privacyLinkText.font = descriptionText.font.withSize(14)
+        privacyLinkText.isEditable = false
+        privacyLinkText.dataDetectorTypes = .link
+        privacyLinkText.isScrollEnabled = false
+        privacyLinkText.backgroundColor = .clear
+        privacyLinkText.linkTextAttributes = [
+            .foregroundColor: UIColor.white
+        ]
+        privacyLinkText.accessibilityIdentifier = "Privacy Link Text"
+    }
+
+    func setupDebugViewUi() {
+        debugView = UIImageView()
+        guard let debugView = debugView else { return }
+        self.view.addSubview(debugView)
+    }
+
+    // MARK: -Autolayout constraints
+    func setupConstraints() {
+        let children: [UIView] = [
+            previewView, blurView, roiView, descriptionText, closeButton, torchButton, numberText,
+            expiryText, nameText, expiryLayoutView, enableCameraPermissionsButton,
+            enableCameraPermissionsText, privacyLinkText,
+        ]
+        for child in children {
+            child.translatesAutoresizingMaskIntoConstraints = false
+        }
+
+        setupPreviewViewConstraints()
+        setupBlurViewConstraints()
+        setupRoiViewConstraints()
+        setupCloseButtonConstraints()
+        setupTorchButtonConstraints()
+        setupDescriptionTextConstraints()
+        setupCardDetailsConstraints()
+        setupDenyConstraints()
+        setupPrivacyLinkTextConstraints()
+
+        if showDebugImageView {
+            setupDebugViewConstraints()
+        }
+    }
+
+    func setupPreviewViewConstraints() {
+        // make it full screen
+        previewView.setAnchorsEqual(to: self.view)
+    }
+
+    func setupBlurViewConstraints() {
+        blurView.setAnchorsEqual(to: self.previewView)
+    }
+
+    func setupRoiViewConstraints() {
+        roiView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16).isActive = true
+        roiView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16).isActive =
+            true
+        roiView.heightAnchor.constraint(equalTo: roiView.widthAnchor, multiplier: 1.0 / 1.586)
+            .isActive = true
+        roiView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+    }
+
+    func setupCloseButtonConstraints() {
+        let margins = view.layoutMarginsGuide
+        closeButton.topAnchor.constraint(equalTo: margins.topAnchor, constant: 16.0).isActive = true
+        closeButton.leadingAnchor.constraint(equalTo: margins.leadingAnchor).isActive = true
+    }
+
+    func setupTorchButtonConstraints() {
+        let margins = view.layoutMarginsGuide
+        torchButton.topAnchor.constraint(equalTo: margins.topAnchor, constant: 16.0).isActive = true
+        torchButton.trailingAnchor.constraint(equalTo: margins.trailingAnchor).isActive = true
+    }
+
+    func setupDescriptionTextConstraints() {
+        descriptionText.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 32).isActive =
+            true
+        descriptionText.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -32)
+            .isActive = true
+        descriptionText.bottomAnchor.constraint(equalTo: roiView.topAnchor, constant: -16).isActive =
+            true
+    }
+
+    func setupCardDetailsConstraints() {
+        numberText.leadingAnchor.constraint(equalTo: roiView.leadingAnchor, constant: 32).isActive =
+            true
+        numberText.trailingAnchor.constraint(equalTo: roiView.trailingAnchor, constant: -32)
+            .isActive = true
+        numberText.centerYAnchor.constraint(equalTo: roiView.centerYAnchor).isActive = true
+
+        nameText.leadingAnchor.constraint(equalTo: numberText.leadingAnchor).isActive = true
+        nameText.bottomAnchor.constraint(equalTo: roiView.bottomAnchor, constant: -16).isActive =
+            true
+
+        expiryLayoutView.topAnchor.constraint(equalTo: numberText.bottomAnchor).isActive = true
+        expiryLayoutView.bottomAnchor.constraint(equalTo: nameText.topAnchor).isActive = true
+        expiryLayoutView.leadingAnchor.constraint(equalTo: numberText.leadingAnchor).isActive = true
+        expiryLayoutView.trailingAnchor.constraint(equalTo: numberText.trailingAnchor).isActive =
+            true
+
+        expiryText.leadingAnchor.constraint(equalTo: expiryLayoutView.leadingAnchor).isActive = true
+        expiryText.trailingAnchor.constraint(equalTo: expiryLayoutView.trailingAnchor).isActive =
+            true
+        expiryText.centerYAnchor.constraint(equalTo: expiryLayoutView.centerYAnchor).isActive = true
+    }
+
+    func setupDenyConstraints() {
+        NSLayoutConstraint.activate([
+            enableCameraPermissionsButton.topAnchor.constraint(
+                equalTo: privacyLinkText.bottomAnchor,
+                constant: 32
+            ),
+            enableCameraPermissionsButton.centerXAnchor.constraint(equalTo: roiView.centerXAnchor),
+
+            enableCameraPermissionsText.topAnchor.constraint(
+                equalTo: enableCameraPermissionsButton.bottomAnchor,
+                constant: 32
+            ),
+            enableCameraPermissionsText.leadingAnchor.constraint(equalTo: roiView.leadingAnchor),
+            enableCameraPermissionsText.trailingAnchor.constraint(equalTo: roiView.trailingAnchor),
+        ])
+    }
+
+    func setupPrivacyLinkTextConstraints() {
+        NSLayoutConstraint.activate([
+            privacyLinkText.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 32),
+            privacyLinkText.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -32),
+            privacyLinkText.topAnchor.constraint(equalTo: roiView.bottomAnchor, constant: 16),
+        ])
+
+        privacyLinkTextHeightConstraint = privacyLinkText.heightAnchor.constraint(
+            equalToConstant: 0
+        )
+    }
+
+    func setupDebugViewConstraints() {
+        guard let debugView = debugView else { return }
+        debugView.translatesAutoresizingMaskIntoConstraints = false
+
+        debugView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        debugView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        debugView.widthAnchor.constraint(equalToConstant: 240).isActive = true
+        debugView.heightAnchor.constraint(equalTo: debugView.widthAnchor, multiplier: 1.0).isActive =
+            true
+    }
+
+    // MARK: -Override some ScanBase functions
+    override func onScannedQR(_ code: String) {
+        delegate?.userDidScanQR(code)
+    }
+
+    override func onScannedCard(
         number: String,
         expiryYear: String?,
         expiryMonth: String?,
         scannedImage: UIImage?
-    ) {}
-    func onScannedQR(_ code: String) {}
-    func showCardNumber(_ number: String, expiry: String?) {}
-    func showWrongCard(number: String?, expiry: String?, name: String?) {}
-    func showNoCard() {}
-    func onCameraPermissionDenied(showedPrompt: Bool) {}
-    func useCurrentFrameNumber(errorCorrectedNumber: String?, currentFrameNumber: String) -> Bool {
-        return true
-    }
-
-    // MARK: Inits
-    public init() {
-        super.init(nibName: nil, bundle: nil)
-    }
-
-    public required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    //MARK: -Torch Logic
-    func toggleTorch() {
-        self.ocrMainLoop()?.scanStats.torchOn = !(self.ocrMainLoop()?.scanStats.torchOn ?? false)
-        self.videoFeed.toggleTorch()
-    }
-
-    func isTorchOn() -> Bool {
-        return self.videoFeed.isTorchOn()
-    }
-
-    func hasTorchAndIsAvailable() -> Bool {
-        return self.videoFeed.hasTorchAndIsAvailable()
-    }
-
-    func setTorchLevel(level: Float) {
-        if 0.0...1.0 ~= level {
-            self.videoFeed.setTorchLevel(level: level)
-        }
-    }
-
-    static func configure(apiKey: String? = nil) {
-        // TODO: remove this and just use stripe's main configuration path
-    }
-
-    static func supportedOrientationMaskOrDefault() -> UIInterfaceOrientationMask {
-        guard ScanBaseViewController.isAppearing else {
-            // If the ScanBaseViewController isn't appearing then fall back
-            // to getting the orientation mask from the infoDictionary, just like
-            // the system would do if the user didn't override the
-            // supportedInterfaceOrientationsFor method
-            let supportedOrientations =
-                (Bundle.main.infoDictionary?["UISupportedInterfaceOrientations"] as? [String]) ?? [
-                    "UIInterfaceOrientationPortrait"
-                ]
-
-            let maskArray = supportedOrientations.map { option -> UIInterfaceOrientationMask in
-                switch option {
-                case "UIInterfaceOrientationPortrait":
-                    return UIInterfaceOrientationMask.portrait
-                case "UIInterfaceOrientationPortraitUpsideDown":
-                    return UIInterfaceOrientationMask.portraitUpsideDown
-                case "UIInterfaceOrientationLandscapeLeft":
-                    return UIInterfaceOrientationMask.landscapeLeft
-                case "UIInterfaceOrientationLandscapeRight":
-                    return UIInterfaceOrientationMask.landscapeRight
-                default:
-                    return UIInterfaceOrientationMask.portrait
-                }
-            }
-
-            let mask: UIInterfaceOrientationMask = maskArray.reduce(
-                UIInterfaceOrientationMask.portrait
-            ) { result, element in
-                return UIInterfaceOrientationMask(rawValue: result.rawValue | element.rawValue)
-            }
-
-            return mask
-        }
-        return ScanBaseViewController.isPadAndFormsheet ? .allButUpsideDown : .portrait
-    }
-
-    static func isCompatible() -> Bool {
-        return self.isCompatible(configuration: ScanConfiguration())
-    }
-
-    static func isCompatible(configuration: ScanConfiguration) -> Bool {
-        // check to see if the user has already denined camera permission
-        let authorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
-        if authorizationStatus != .authorized && authorizationStatus != .notDetermined
-            && configuration.setPreviouslyDeniedDevicesAsIncompatible
-        {
-            return false
-        }
-
-        // make sure that we don't run on iPhone 6 / 6plus or older
-        if configuration.runOnOldDevices {
-            return true
-        }
-
-        return true
-    }
-
-    func cancelScan() {
-        guard let ocrMainLoop = ocrMainLoop() else {
-            return
-        }
-        ocrMainLoop.userCancelled()
-    }
-
-    func setupMask() {
-        guard let roi = self.regionOfInterestLabel else { return }
-        guard let blurView = self.blurView else { return }
-        blurView.maskToRoi(roi: roi)
-    }
-
-    func setUpCorners() {
-        guard let roi = self.regionOfInterestLabel else { return }
-        guard let corners = self.cornerView else { return }
-        corners.setFrameSize(roi: roi)
-        corners.drawCorners()
-    }
-
-    func permissionDidComplete(granted: Bool, showedPrompt: Bool) {
-        self.ocrMainLoop()?.scanStats.permissionGranted = granted
-        if !granted {
-            self.onCameraPermissionDenied(showedPrompt: showedPrompt)
-        }
-    }
-
-    // you must call setupOnViewDidLoad before calling this function and you have to call
-    // this function to get the camera going
-    func startCameraPreview() {
-        self.videoFeed.requestCameraAccess(permissionDelegate: self)
-    }
-
-    func setupOnViewDidLoad(
-        regionOfInterestLabel: UIView,
-        blurView: BlurView,
-        previewView: PreviewView,
-        cornerView: CornerView?,
-        debugImageView: UIImageView?,
-        torchLevel: Float?
     ) {
+        let card = CreditCard(number: number)
+        card.expiryMonth = expiryMonth
+        card.expiryYear = expiryYear
+        card.name = predictedName
+        card.image = scannedImage
 
-        self.regionOfInterestLabel = regionOfInterestLabel
-        self.blurView = blurView
-        self.previewView = previewView
-        self.debugImageView = debugImageView
-        self.debugImageView?.contentMode = .scaleAspectFit
-        self.cornerView = cornerView
-        ScanBaseViewController.isPadAndFormsheet =
-            UIDevice.current.userInterfaceIdiom == .pad && self.modalPresentationStyle == .formSheet
+        delegate?.userDidScanCardSimple(self, creditCard: card)
+    }
 
-        setNeedsStatusBarAppearanceUpdate()
-        regionOfInterestLabel.layer.masksToBounds = true
-        regionOfInterestLabel.layer.cornerRadius = self.regionOfInterestCornerRadius
-        regionOfInterestLabel.layer.borderColor = UIColor.white.cgColor
-        regionOfInterestLabel.layer.borderWidth = 2.0
-
-        if !ScanBaseViewController.isPadAndFormsheet {
-            UIDevice.current.setValue(UIDeviceOrientation.portrait.rawValue, forKey: "orientation")
+    func showScannedCardDetails(prediction: CreditCardOcrPrediction) {
+        guard let number = prediction.number else {
+            return
         }
 
-        mainLoop = createOcrMainLoop()
+        numberText.text = CreditCardUtils.format(number: number)
+        if numberText.isHidden {
+            numberText.fadeIn()
+        }
 
-        self.ocrMainLoop()?.mainLoopDelegate = self
-        self.previewView?.videoPreviewLayer.session = self.videoFeed.session
-
-        self.videoFeed.pauseSession()
-        //Apple example app sets up in viewDidLoad: https://developer.apple.com/documentation/avfoundation/cameras_and_media_capture/avcam_building_a_camera_app
-        self.videoFeed.setup(
-            captureDelegate: self,
-            objectsDelegate: self,
-            initialVideoOrientation: self.initialVideoOrientation,
-            completion: { success in
-                if self.previewView?.videoPreviewLayer.connection?.isVideoOrientationSupported
-                    ?? false
-                {
-                    self.previewView?.videoPreviewLayer.connection?.videoOrientation =
-                        self.initialVideoOrientation
-                }
-                if let level = torchLevel {
-                    self.setTorchLevel(level: level)
-                }
+        if let expiry = prediction.expiryForDisplay {
+            expiryText.text = expiry
+            if expiryText.isHidden {
+                expiryText.fadeIn()
             }
-        )
-    }
-
-    func createOcrMainLoop() -> OcrMainLoop? {
-        OcrMainLoop()
-    }
-
-    public override var shouldAutorotate: Bool {
-        return true
-    }
-
-    public override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        return ScanBaseViewController.isPadAndFormsheet ? .allButUpsideDown : .portrait
-    }
-
-    public override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
-        return ScanBaseViewController.isPadAndFormsheet ? UIWindow.interfaceOrientation : .portrait
-    }
-
-    public override var preferredStatusBarStyle: UIStatusBarStyle {
-        return .lightContent
-    }
-
-    public override func viewWillTransition(
-        to size: CGSize,
-        with coordinator: UIViewControllerTransitionCoordinator
-    ) {
-        super.viewWillTransition(to: size, with: coordinator)
-
-        if let videoFeedConnection = self.videoFeed.videoDeviceConnection,
-            videoFeedConnection.isVideoOrientationSupported
-        {
-            videoFeedConnection.videoOrientation =
-                AVCaptureVideoOrientation(deviceOrientation: UIDevice.current.orientation)
-                ?? .portrait
         }
-        if let previewViewConnection = self.previewView?.videoPreviewLayer.connection,
-            previewViewConnection.isVideoOrientationSupported
-        {
-            previewViewConnection.videoOrientation =
-                AVCaptureVideoOrientation(deviceOrientation: UIDevice.current.orientation)
-                ?? .portrait
-        }
-    }
 
-    public override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        ScanBaseViewController.isAppearing = true
-        /// Set beginning of scan session
-
-        self.ocrMainLoop()?.reset()
-        self.calledOnScannedCard = false
-        self.videoFeed.willAppear()
-        self.isNavigationBarHidden = self.navigationController?.isNavigationBarHidden ?? true
-        let hideNavigationBar = self.hideNavigationBar ?? true
-        self.navigationController?.setNavigationBarHidden(hideNavigationBar, animated: animated)
-    }
-
-    public override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-
-        self.view.layoutIfNeeded()
-        guard let roiFrame = self.regionOfInterestLabel?.frame,
-            let previewViewFrame = self.previewView?.frame
-        else { return }
-        // store .frame to avoid accessing UI APIs in the machineLearningQueue
-        self.regionOfInterestLabelFrame = roiFrame
-        self.previewViewFrame = previewViewFrame
-        self.setUpCorners()
-        self.setupMask()
-    }
-
-    public override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        self.ocrMainLoop()?.scanStats.orientation = UIWindow.interfaceOrientationToString
-    }
-
-    public override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        self.videoFeed.willDisappear()
-        self.navigationController?.setNavigationBarHidden(
-            self.isNavigationBarHidden ?? false,
-            animated: animated
-        )
-    }
-
-    public override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        ScanBaseViewController.isAppearing = false
-    }
-
-    func getScanStats() -> ScanStats {
-        return self.ocrMainLoop()?.scanStats ?? ScanStats()
-    }
-
-    public func captureOutput(
-        _ output: AVCaptureOutput,
-        didOutput sampleBuffer: CMSampleBuffer,
-        from connection: AVCaptureConnection
-    ) {
-        if self.machineLearningSemaphore.wait(timeout: .now()) == .success {
-            ScanBaseViewController.machineLearningQueue.async {
-                self.captureOutputWork(sampleBuffer: sampleBuffer)
-                self.machineLearningSemaphore.signal()
+        if let name = prediction.name {
+            nameText.text = name
+            if nameText.isHidden {
+                nameText.fadeIn()
             }
         }
     }
 
-    func captureOutputWork(sampleBuffer: CMSampleBuffer) {
-        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-            return
-        }
-
-        guard let fullCameraImage = pixelBuffer.cgImage() else {
-            return
-        }
-
-        // confirm videoGravity settings in previewView. Calculations based on .resizeAspectFill
-        DispatchQueue.main.async {
-            assert(self.previewView?.videoPreviewLayer.videoGravity == .resizeAspectFill)
-        }
-
-        guard let roiFrame = self.regionOfInterestLabelFrame,
-            let previewViewFrame = self.previewViewFrame,
-            let scannedImageData = ScannedCardImageData(
-                captureDeviceImage: fullCameraImage,
-                viewfinderRect: roiFrame,
-                previewViewRect: previewViewFrame
-            )
-        else {
-            return
-        }
-
-        mainLoop?.push(imageData: scannedImageData)
-    }
-
-    func updateDebugImageView(image: UIImage) {
-        self.debugImageView?.image = image
-        if self.debugImageView?.isHidden ?? false {
-            self.debugImageView?.isHidden = false
-        }
-    }
-
-    // MARK: -OcrMainLoopComplete logic
-    func complete(creditCardOcrResult: CreditCardOcrResult) {
-        ocrMainLoop()?.mainLoopDelegate = nil
-        /// Stop the previewing when we are done
-        self.previewView?.videoPreviewLayer.session?.stopRunning()
-
-        ScanBaseViewController.machineLearningQueue.async {
-            self.scanEventsDelegate?.onScanComplete(scanStats: self.getScanStats())
-        }
-
-        // hack to work around having to change our  interface
-        predictedName = creditCardOcrResult.name
-        self.onScannedCard(
-            number: creditCardOcrResult.number,
-            expiryYear: creditCardOcrResult.expiryYear,
-            expiryMonth: creditCardOcrResult.expiryMonth,
-            scannedImage: scannedCardImage
-        )
-    }
-
-    func prediction(
+    override func prediction(
         prediction: CreditCardOcrPrediction,
         imageData: ScannedCardImageData,
         state: MainLoopState
     ) {
-        if !firstImageProcessed {
-            firstImageProcessed = true
-        }
+        super.prediction(prediction: prediction, imageData: imageData, state: state)
 
-        if self.showDebugImageView {
-            let numberBoxes = prediction.numberBoxes?.map { (UIColor.blue, $0) } ?? []
-            let expiryBoxes = prediction.expiryBoxes?.map { (UIColor.red, $0) } ?? []
-            let nameBoxes = prediction.nameBoxes?.map { (UIColor.green, $0) } ?? []
-
-            if self.debugImageView?.isHidden ?? false {
-                self.debugImageView?.isHidden = false
-            }
-
-            self.debugImageView?.image = prediction.image.drawBoundingBoxesOnImage(
-                boxes: numberBoxes + expiryBoxes + nameBoxes
-            )
-        }
-
-        if prediction.number != nil && self.includeCardImage {
-            self.scannedCardImage = UIImage(cgImage: prediction.image)
-        }
-
-        let isFlashForcedOn: Bool
-        switch state {
-        case .ocrForceFlash: isFlashForcedOn = true
-        default: isFlashForcedOn = false
-        }
-
-        if let number = prediction.number {
-            if !firstPanObserved {
-                firstPanObserved = true
-            }
-
-            let expiry = prediction.expiryObject()
-
-            ScanBaseViewController.machineLearningQueue.async {
-                self.scanEventsDelegate?.onNumberRecognized(
-                    number: number,
-                    expiry: expiry,
-                    imageData: imageData,
-                    centeredCardState: prediction.centeredCardState,
-                    flashForcedOn: isFlashForcedOn
-                )
-            }
-        } else {
-            ScanBaseViewController.machineLearningQueue.async {
-                self.scanEventsDelegate?.onFrameDetected(
-                    imageData: imageData,
-                    centeredCardState: prediction.centeredCardState,
-                    flashForcedOn: isFlashForcedOn
-                )
-            }
-        }
+        showScannedCardDetails(prediction: prediction)
     }
 
-    func showCardDetails(number: String?, expiry: String?, name: String?) {
-        guard let number = number else { return }
-        showCardNumber(number, expiry: expiry)
+    override func onCameraPermissionDenied(showedPrompt: Bool) {
+        descriptionText.isHidden = true
+        torchButton.isHidden = true
+
+        enableCameraPermissionsButton.isHidden = false
+        enableCameraPermissionsText.isHidden = false
+        privacyLinkTextHeightConstraint?.isActive = true
     }
 
-    func showCardDetailsWithFlash(number: String?, expiry: String?, name: String?) {
-        if !isTorchOn() { toggleTorch() }
-        guard let number = number else { return }
-        showCardNumber(number, expiry: expiry)
+    // MARK: -UI event handlers
+    @objc func cancelButtonPress() {
+        delegate?.userDidCancelSimple(self)
+        self.cancelScan()
     }
 
-    func shouldUsePrediction(
-        errorCorrectedNumber: String?,
-        prediction: CreditCardOcrPrediction
-    ) -> Bool {
-        guard let predictedNumber = prediction.number else { return true }
-        return useCurrentFrameNumber(
-            errorCorrectedNumber: errorCorrectedNumber,
-            currentFrameNumber: predictedNumber
-        )
+    @objc func torchButtonPress() {
+        toggleTorch()
+    }
+
+    /// Warning: if the user navigates to settings and updates the setting, it'll suspend your app.
+    @objc func enableCameraPermissionsPress() {
+        guard let settingsUrl = URL(string: UIApplication.openSettingsURLString),
+            UIApplication.shared.canOpenURL(settingsUrl)
+        else {
+            return
+        }
+
+        UIApplication.shared.open(settingsUrl)
     }
 }
 
-extension AMCameraScanner: AVCaptureMetadataOutputObjectsDelegate {
-
-    public func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
-
-        guard let metadataObject = metadataObjects.first,
-              let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject,
-              let stringValue = readableObject.stringValue else { return }
-
-        ocrMainLoop()?.mainLoopDelegate = nil
-        self.previewView?.videoPreviewLayer.session?.stopRunning()
-
-        ScanBaseViewController.machineLearningQueue.async {
-            self.scanEventsDelegate?.onScanComplete(scanStats: self.getScanStats())
-        }
-
-        self.onScannedQR(stringValue)
+extension UIView {
+    func setAnchorsEqual(to otherView: UIView) {
+        self.topAnchor.constraint(equalTo: otherView.topAnchor).isActive = true
+        self.leadingAnchor.constraint(equalTo: otherView.leadingAnchor).isActive = true
+        self.trailingAnchor.constraint(equalTo: otherView.trailingAnchor).isActive = true
+        self.bottomAnchor.constraint(equalTo: otherView.bottomAnchor).isActive = true
     }
 }
