@@ -378,9 +378,9 @@ public class AMCameraScanner: ScanBaseViewController {
     }
 
     func setupDescriptionTextConstraints() {
-        descriptionText.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 32).isActive =
+        descriptionText.leadingAnchor.constraint(equalTo: roiView.leadingAnchor).isActive =
             true
-        descriptionText.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -32)
+        descriptionText.trailingAnchor.constraint(equalTo: roiView.trailingAnchor)
             .isActive = true
         descriptionText.topAnchor.constraint(equalTo: expiryLayoutView.bottomAnchor, constant: 24).isActive =
             true
