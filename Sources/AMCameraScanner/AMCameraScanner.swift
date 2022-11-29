@@ -367,7 +367,7 @@ public class AMCameraScanner: ScanBaseViewController {
 
     func setupTorchButtonConstraints() {
         let margins = view.layoutMarginsGuide
-        torchButton.bottomAnchor.constraint(equalTo: margins.bottomAnchor, constant: 16).isActive =
+        torchButton.bottomAnchor.constraint(equalTo: margins.bottomAnchor, constant: -16).isActive =
             true
         torchButton.leadingAnchor.constraint(equalTo: margins.leadingAnchor).isActive = true
         //torchButton.topAnchor.constraint(equalTo: margins.topAnchor, constant: 16.0).isActive = true
