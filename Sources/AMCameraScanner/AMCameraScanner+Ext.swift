@@ -24,21 +24,4 @@ public extension AMCameraScanner {
             closeButton.setImage(newValue, for: .normal)
         }
     }
-
-    var torchButtonTitle: String? {
-        get {
-            torchButton.titleLabel?.text
-        } set {
-            torchButton.setTitle(newValue, for: .normal)
-        }
-    }
-
-    var torchButtonImage: UIImage? {
-        get {
-            torchButton.imageView?.image
-        } set {
-            torchButton.setImage(newValue, for: .normal)
-        }
-    }
-
 }
