@@ -62,24 +62,6 @@ public protocol AMCameraScannerDelegate: AnyObject {
     func userDidScanQR(_ code: String)
 }
 
-public extension AMCameraScanner {
-    var closeButtonTitle: String? {
-        get {
-            closeButton.titleLabel?.text
-        } set {
-            closeButton.setTitle(newValue, for: .normal)
-        }
-    }
-
-    var closeButtonImage: UIImage? {
-        get {
-            closeButton.imageView?.image
-        } set {
-            closeButton.setImage(newValue, for: .normal)
-        }
-    }
-}
-
 public class AMCameraScanner: ScanBaseViewController {
 
     // used by ScanBase
@@ -104,7 +86,6 @@ public class AMCameraScanner: ScanBaseViewController {
         var button = UIButton(type: .system)
         button.setTitleColor(.white, for: .normal)
         button.tintColor = .white
-        button.setTitle(AMCameraScanner.torchButtonString, for: .normal)
         return button
     }()
 
@@ -122,7 +103,6 @@ public class AMCameraScanner: ScanBaseViewController {
     static var descriptionString = "String.Localized.scan_card_title_capitalization"
     static var enableCameraPermissionString = "String.Localized.enable_camera_access"
     static var enableCameraPermissionsDescriptionString = "String.Localized.update_phone_settings"
-    static var torchButtonString = "String.Localized.torch"
     static var privacyLinkString = "String.Localized.scanCardExpectedPrivacyLinkText()"
 
     public weak var delegate: AMCameraScannerDelegate?
@@ -387,8 +367,11 @@ public class AMCameraScanner: ScanBaseViewController {
 
     func setupTorchButtonConstraints() {
         let margins = view.layoutMarginsGuide
-        torchButton.topAnchor.constraint(equalTo: margins.topAnchor, constant: 16.0).isActive = true
-        torchButton.trailingAnchor.constraint(equalTo: margins.trailingAnchor).isActive = true
+        torchButton.bottomAnchor.constraint(equalTo: margins.bottomAnchor, constant: 16).isActive =
+            true
+        torchButton.leadingAnchor.constraint(equalTo: margins.leadingAnchor).isActive = true
+        //torchButton.topAnchor.constraint(equalTo: margins.topAnchor, constant: 16.0).isActive = true
+        //torchButton.trailingAnchor.constraint(equalTo: margins.trailingAnchor).isActive = true
     }
 
     func setupDescriptionTextConstraints() {
