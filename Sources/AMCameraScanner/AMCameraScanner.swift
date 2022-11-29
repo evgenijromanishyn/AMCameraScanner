@@ -82,10 +82,14 @@ public class AMCameraScanner: ScanBaseViewController {
         return button
     }()
 
-    open var torchButton: UIButton = {
+    var torchButton: UIButton = {
         var button = UIButton(type: .system)
         button.setTitleColor(.white, for: .normal)
         button.tintColor = .white
+        button.backgroundColor = .init(white: 0.0, alpha: 0.5)
+        button.layer.cornerRadius = 24
+        button.layer.masksToBounds = true
+        button.clipsToBounds = true
         return button
     }()
 
