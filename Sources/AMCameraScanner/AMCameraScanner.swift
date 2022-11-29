@@ -62,6 +62,16 @@ public protocol AMCameraScannerDelegate: AnyObject {
     func userDidScanQR(_ code: String)
 }
 
+public extension AMCameraScanner {
+    var closeButtonTitle: String? {
+        get {
+            closeButton.titleLabel?.text
+        } set {
+            closeButton.setTitle(newValue, for: .normal)
+        }
+    }
+}
+
 public class AMCameraScanner: ScanBaseViewController {
 
     // used by ScanBase
@@ -79,7 +89,6 @@ public class AMCameraScanner: ScanBaseViewController {
         var button = UIButton(type: .system)
         button.setTitleColor(.white, for: .normal)
         button.tintColor = .white
-        button.setTitle(AMCameraScanner.closeButtonString, for: .normal)
         return button
     }()
 
@@ -105,7 +114,6 @@ public class AMCameraScanner: ScanBaseViewController {
     static var descriptionString = "String.Localized.scan_card_title_capitalization"
     static var enableCameraPermissionString = "String.Localized.enable_camera_access"
     static var enableCameraPermissionsDescriptionString = "String.Localized.update_phone_settings"
-    static var closeButtonString = "String.Localized.close"
     static var torchButtonString = "String.Localized.torch"
     static var privacyLinkString = "String.Localized.scanCardExpectedPrivacyLinkText()"
 

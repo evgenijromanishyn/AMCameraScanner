@@ -17,13 +17,11 @@ public class CreditCard: NSObject {
     public var cvv: String?
     public var postalCode: String?
 
-    init(
-        number: String
-    ) {
+    init(number: String) {
         self.number = number
     }
 
-    func expiryForDisplay() -> String? {
+    var expiryForDisplay: String? {
         guard var month = self.expiryMonth, var year = self.expiryYear else {
             return nil
         }
