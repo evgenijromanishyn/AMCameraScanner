@@ -70,6 +70,14 @@ public extension AMCameraScanner {
             closeButton.setTitle(newValue, for: .normal)
         }
     }
+
+    var closeButtonImage: UIImage? {
+        get {
+            closeButton.imageView?.image
+        } set {
+            closeButton.setImage(newValue, for: .normal)
+        }
+    }
 }
 
 public class AMCameraScanner: ScanBaseViewController {
