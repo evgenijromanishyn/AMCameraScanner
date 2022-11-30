@@ -19,6 +19,7 @@ class AppleCreditCardOcr: CreditCardOcrImplementation {
         }
 
         var pan: String?
+        var hasNumbers = false
         var expiryMonth: String?
         var expiryYear: String?
         let semaphore = DispatchSemaphore(value: 0)
@@ -30,7 +31,8 @@ class AppleCreditCardOcr: CreditCardOcrImplementation {
         var nameCandidates: [OcrObject] = []
         AppleOcr.recognizeText(in: image) { results in
             for result in results {
-                let predictedPan = CreditCardOcrPrediction.pan(result.text)
+                let (predictedPan, isNumber) = CreditCardOcrPrediction.pan(result.text)
+                hasNumbers = isNumber
                 let expiry = CreditCardOcrPrediction.likelyExpiry(result.text)
                 if let (month, year) = expiry {
                     if CreditCardUtils.isValidDate(expMonth: month, expYear: year) {
@@ -75,6 +77,7 @@ class AppleCreditCardOcr: CreditCardOcrImplementation {
             image: image,
             ocrCroppingRectangle: roiForOcr,
             number: pan,
+            hasNumbers: hasNumbers,
             expiryMonth: expiryMonth,
             expiryYear: expiryYear,
             name: name,

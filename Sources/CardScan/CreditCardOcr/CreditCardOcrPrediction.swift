@@ -34,6 +34,7 @@ struct CreditCardOcrPrediction {
     let image: CGImage
     let ocrCroppingRectangle: CGRect
     let number: String?
+    let hasNumbers: Bool
     let expiryMonth: String?
     let expiryYear: String?
     let name: String?
@@ -50,6 +51,7 @@ struct CreditCardOcrPrediction {
         image: CGImage,
         ocrCroppingRectangle: CGRect,
         number: String?,
+        hasNumbers: Bool,
         expiryMonth: String?,
         expiryYear: String?,
         name: String?,
@@ -64,6 +66,7 @@ struct CreditCardOcrPrediction {
         self.image = image
         self.ocrCroppingRectangle = ocrCroppingRectangle
         self.number = number
+        self.hasNumbers = hasNumbers
         self.expiryMonth = expiryMonth
         self.expiryYear = expiryYear
         self.name = name
@@ -93,6 +96,7 @@ struct CreditCardOcrPrediction {
             image: self.image,
             ocrCroppingRectangle: self.ocrCroppingRectangle,
             number: self.number,
+            hasNumbers: self.hasNumbers,
             expiryMonth: self.expiryMonth,
             expiryYear: self.expiryYear,
             name: self.name,
@@ -110,6 +114,7 @@ struct CreditCardOcrPrediction {
             image: cgImage,
             ocrCroppingRectangle: CGRect(),
             number: nil,
+            hasNumbers: false,
             expiryMonth: nil,
             expiryYear: nil,
             name: nil,
@@ -179,14 +184,13 @@ struct CreditCardOcrPrediction {
         return (String(string[range1]), String(string[range2]))
     }
 
-    static func pan(_ text: String) -> String? {
+    static func pan(_ text: String) -> (String?, Bool) {
         let digitsAndSpace = text.reduce(true) { $0 && (($1 >= "0" && $1 <= "9") || $1 == " ") }
         let number = text.compactMap { $0 >= "0" && $0 <= "9" ? $0 : nil }.map { String($0) }
             .joined()
 
-        guard digitsAndSpace else { return nil }
-        print("pan:\(number)")
-        guard CreditCardUtils.isValidNumber(cardNumber: number) else { return nil }
-        return number
+        guard digitsAndSpace else { return (nil, false) }
+        guard CreditCardUtils.isValidNumber(cardNumber: number) else { return (nil, true) }
+        return (number, true)
     }
 }
