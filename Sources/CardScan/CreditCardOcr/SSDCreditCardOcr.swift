@@ -38,7 +38,7 @@ class SSDCreditCardOcr: CreditCardOcrImplementation {
             image: image,
             ocrCroppingRectangle: ocrRoiRectangle,
             number: number,
-            hasNumbers: true,
+            hasNumbers: number != nil,
             expiryMonth: nil,
             expiryYear: nil,
             name: nil,
