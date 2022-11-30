@@ -470,6 +470,7 @@ public class AMCameraScanner: ScanBaseViewController {
         card.image = scannedImage
 
         delegate?.userDidScanCardSimple(self, creditCard: card)
+        cancelScan()
     }
 
     func showScannedCardDetails(prediction: CreditCardOcrPrediction) {
