@@ -475,9 +475,12 @@ public class AMCameraScanner: ScanBaseViewController {
         guard let number = prediction.number else {
             return
         }
-
-        roiViewHeight?.constant = 1.0 / 1.586
         
+        UIView.animate(withDuration: 0.5) {
+            roiViewHeight?.constant = 1.0 / 1.586
+            self.view.layoutIfNeeded()
+        }
+
         numberText.text = CreditCardUtils.format(number: number)
         if numberText.isHidden {
             numberText.fadeIn()
