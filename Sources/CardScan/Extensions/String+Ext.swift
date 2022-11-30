@@ -9,7 +9,8 @@ import Foundation
 
 extension String {
     var digitsAndSpace: Bool {
-        return "\(Int(self))".count >= 4
+        guard let intValue = Int(self) else { return false }
+        return "\(intValue)".count >= 4
         //self.reduce(true) { $0 && (($1 >= "0" && $1 <= "9") || $1 == " ") }
     }
 }
