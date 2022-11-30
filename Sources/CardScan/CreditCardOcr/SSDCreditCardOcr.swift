@@ -28,19 +28,17 @@ class SSDCreditCardOcr: CreditCardOcrImplementation {
         }
 
         let startTime = Date()
-        let number = ocr.perform(croppedCardImage: image)
+        let (string, isNumber) = ocr.perform(croppedCardImage: image)
         let duration = -startTime.timeIntervalSinceNow
         let numberBoxes = ocr.lastDetectedBoxes
 
-        print(number)
-        
         self.computationTime += duration
         self.frames += 1
         return CreditCardOcrPrediction(
             image: image,
             ocrCroppingRectangle: ocrRoiRectangle,
-            number: number,
-            hasNumbers: number != nil,
+            number: string,
+            hasNumbers: isNumber,
             expiryMonth: nil,
             expiryYear: nil,
             name: nil,

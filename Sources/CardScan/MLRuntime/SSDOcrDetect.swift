@@ -113,7 +113,7 @@ import UIKit
         }
     }
 
-    func detectOcrObjects(prediction: SSDOcrOutput, image: UIImage) -> String? {
+    func detectOcrObjects(prediction: SSDOcrOutput, image: UIImage) -> (String, Bool)? {
         var DetectedOcrBoxes = DetectedAllOcrBoxes()
 
         var (scores, boxes, filterArray) = prediction.getScores(filterThreshold: filterThreshold)
@@ -164,23 +164,23 @@ import UIKit
         }
 
         if OcrDDUtils.isQuickRead(allBoxes: DetectedOcrBoxes) {
-            guard let (number, boxes) = OcrDDUtils.processQuickRead(allBoxes: DetectedOcrBoxes)
-            else { return nil }
+            guard let (number, boxes, isNumber) = OcrDDUtils.processQuickRead(allBoxes: DetectedOcrBoxes)
+            else { return (nil, false) }
             self.lastDetectedBoxes = boxes
-            return number
+            return (number, isNumber)
         } else {
             guard
-                let (number, boxes) = OcrDDUtils.sortAndRemoveFalsePositives(
+                let (number, boxes, isNumber) = OcrDDUtils.sortAndRemoveFalsePositives(
                     allBoxes: DetectedOcrBoxes
                 )
-            else { return nil }
+            else { return (nil, false) }
             self.lastDetectedBoxes = boxes
-            return number
+            return (number, isNumber)
         }
 
     }
 
-    func predict(image: UIImage) -> String? {
+    func predict(image: UIImage) -> (String, Bool)? {
 
         SSDOcrDetect.initializeModels()
         guard
@@ -193,9 +193,7 @@ import UIKit
 
         }
 
-        guard let ocrDetectModel = ssdOcrModel else {
-            return nil
-        }
+        guard let ocrDetectModel = ssdOcrModel else { return nil }
 
         let input = SSDOcrInput(_0: pixelBuffer)
 
