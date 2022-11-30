@@ -475,9 +475,9 @@ public class AMCameraScanner: ScanBaseViewController {
         guard let number = prediction.number else {
             return
         }
-        
+
         UIView.animate(withDuration: 0.5) {
-            roiViewHeight?.constant = 1.0 / 1.586
+            self.roiViewHeight?.constant = 1.0 / 1.586
             self.view.layoutIfNeeded()
         }
 
