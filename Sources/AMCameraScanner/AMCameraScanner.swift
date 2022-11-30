@@ -472,6 +472,8 @@ public class AMCameraScanner: ScanBaseViewController {
     }
 
     func showScannedCardDetails(prediction: CreditCardOcrPrediction) {
+        print(prediction.centeredCardState?.hasCard())
+
         guard let number = prediction.number else {
             return
         }
