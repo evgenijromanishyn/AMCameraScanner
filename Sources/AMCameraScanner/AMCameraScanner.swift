@@ -75,7 +75,8 @@ public class AMCameraScanner: ScanBaseViewController {
     var privacyLinkText = UITextView()
     var privacyLinkTextHeightConstraint: NSLayoutConstraint? = nil
 
-    private var roiViewHeight: NSLayoutConstraint?
+    private var roiViewQR: NSLayoutConstraint?
+    private var roiViewCard: NSLayoutConstraint?
 
     var closeButton: UIButton = {
         var button = UIButton(type: .system)
@@ -359,10 +360,9 @@ public class AMCameraScanner: ScanBaseViewController {
         roiView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40).isActive = true
         roiView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40).isActive =
             true
-//        roiView.heightAnchor.constraint(equalTo: roiView.widthAnchor, multiplier: 1.0 / 1.586)
-//            .isActive = true
-        roiViewHeight = roiView.heightAnchor.constraint(equalTo: roiView.widthAnchor, multiplier: 1.0 )
-        roiViewHeight?.isActive = true
+        roiViewCard = roiView.heightAnchor.constraint(equalTo: roiView.widthAnchor, multiplier: 1.0 / 1.586 )
+        roiViewQR = roiView.heightAnchor.constraint(equalTo: roiView.widthAnchor, multiplier: 1.0 )
+        roiViewQR?.isActive = true
         roiView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
     }
 
@@ -476,8 +476,10 @@ public class AMCameraScanner: ScanBaseViewController {
             return
         }
 
+        roiViewQR?.isActive = false
+        roiViewCard?.isActive = true
         //UIView.animate(withDuration: 0.5) {
-            self.roiViewHeight?.constant = 1.0 / 1.586
+            //self.roiViewHeight?.constant = 1.0 / 1.586
             self.view.layoutIfNeeded()
         //}
 
