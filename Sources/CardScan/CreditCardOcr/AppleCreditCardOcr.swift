@@ -77,7 +77,9 @@ class AppleCreditCardOcr: CreditCardOcrImplementation {
         self.computationTime += duration
         self.frames += 1
 
-        if !hasNumbers {
+        if hasNumbers {
+            print(debugString)
+        } else {
             print(debugString)
         }
         return CreditCardOcrPrediction(
