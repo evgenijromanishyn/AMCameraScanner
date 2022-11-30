@@ -185,11 +185,11 @@ struct CreditCardOcrPrediction {
     }
 
     static func pan(_ text: String) -> (String?, Bool) {
-        let digitsAndSpace = text.reduce(true) { $0 && (($1 >= "0" && $1 <= "9") || $1 == " ") }
+        guard text.digitsAndSpace else { return (nil, false) }
+
         let number = text.compactMap { $0 >= "0" && $0 <= "9" ? $0 : nil }.map { String($0) }
             .joined()
 
-        guard digitsAndSpace else { return (nil, false) }
         guard CreditCardUtils.isValidNumber(cardNumber: number) else { return (nil, true) }
         return (number, true)
     }

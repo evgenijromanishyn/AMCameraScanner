@@ -32,6 +32,8 @@ class SSDCreditCardOcr: CreditCardOcrImplementation {
         let duration = -startTime.timeIntervalSinceNow
         let numberBoxes = ocr.lastDetectedBoxes
 
+        print(number)
+        
         self.computationTime += duration
         self.frames += 1
         return CreditCardOcrPrediction(

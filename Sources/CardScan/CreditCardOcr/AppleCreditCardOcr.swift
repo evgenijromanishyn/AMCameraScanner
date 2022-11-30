@@ -33,9 +33,6 @@ class AppleCreditCardOcr: CreditCardOcrImplementation {
             for result in results {
                 let (predictedPan, isNumber) = CreditCardOcrPrediction.pan(result.text)
                 hasNumbers = isNumber
-                if hasNumbers {
-                    print(predictedPan)
-                }
                 let expiry = CreditCardOcrPrediction.likelyExpiry(result.text)
                 if let (month, year) = expiry {
                     if CreditCardUtils.isValidDate(expMonth: month, expYear: year) {
