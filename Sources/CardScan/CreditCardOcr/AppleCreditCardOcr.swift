@@ -18,6 +18,7 @@ class AppleCreditCardOcr: CreditCardOcrImplementation {
             return CreditCardOcrPrediction.emptyPrediction(cgImage: fullImage)
         }
 
+        var debugString = ""
         var pan: String?
         var hasNumbers = false
         var expiryMonth: String?
@@ -31,6 +32,7 @@ class AppleCreditCardOcr: CreditCardOcrImplementation {
         var nameCandidates: [OcrObject] = []
         AppleOcr.recognizeText(in: image) { results in
             for result in results {
+                debugString = "\(debugString)\(result.text)"
                 let (predictedPan, isNumber) = CreditCardOcrPrediction.pan(result.text)
                 if !hasNumbers {
                     hasNumbers = isNumber
@@ -75,6 +77,9 @@ class AppleCreditCardOcr: CreditCardOcrImplementation {
         self.computationTime += duration
         self.frames += 1
 
+        if !hasNumbers {
+            print(debugString)
+        }
         return CreditCardOcrPrediction(
             image: image,
             ocrCroppingRectangle: roiForOcr,
