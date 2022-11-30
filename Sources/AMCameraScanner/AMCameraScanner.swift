@@ -78,7 +78,6 @@ public class AMCameraScanner: ScanBaseViewController {
     private var roiViewQR: NSLayoutConstraint!
     private var roiViewCard: NSLayoutConstraint!
     private var completedAnimation = true
-    private var scanningEnded = false
 
     var closeButton: UIButton = {
         var button = UIButton(type: .system)
@@ -458,7 +457,6 @@ public class AMCameraScanner: ScanBaseViewController {
     // MARK: -Override some ScanBase functions
     override func onScannedQR(_ code: String) {
         delegate?.userDidScanQR(code)
-        scanningEnded = true
     }
 
     override func onScannedCard(number: String,
@@ -472,7 +470,6 @@ public class AMCameraScanner: ScanBaseViewController {
         card.image = scannedImage
 
         delegate?.userDidScanCardSimple(self, creditCard: card)
-        scanningEnded = true
     }
 
     func showScannedCardDetails(prediction: CreditCardOcrPrediction) {
@@ -514,7 +511,8 @@ public class AMCameraScanner: ScanBaseViewController {
                              state: MainLoopState) {
         super.prediction(prediction: prediction, imageData: imageData, state: state)
 
-        guard completedAnimation || !scanningEnded else { return }
+        print(state)
+        guard completedAnimation else { return }
         showScannedCardDetails(prediction: prediction)
     }
 
