@@ -113,7 +113,7 @@ import UIKit
         }
     }
 
-    func detectOcrObjects(prediction: SSDOcrOutput, image: UIImage) -> (String, Bool)? {
+    func detectOcrObjects(prediction: SSDOcrOutput, image: UIImage) -> (String?, Bool)? {
         var DetectedOcrBoxes = DetectedAllOcrBoxes()
 
         var (scores, boxes, filterArray) = prediction.getScores(filterThreshold: filterThreshold)
@@ -180,7 +180,7 @@ import UIKit
 
     }
 
-    func predict(image: UIImage) -> (String, Bool)? {
+    func predict(image: UIImage) -> (String?, Bool)? {
 
         SSDOcrDetect.initializeModels()
         guard

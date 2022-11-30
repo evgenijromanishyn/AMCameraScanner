@@ -18,7 +18,7 @@ class OcrDD {
         ssdOcr.warmUp()
     }
 
-    func perform(croppedCardImage: CGImage) -> (String, Bool)? {
+    func perform(croppedCardImage: CGImage) -> (String?, Bool)? {
         let value = ssdOcr.predict(image: UIImage(cgImage: croppedCardImage))
         self.lastDetectedBoxes = ssdOcr.lastDetectedBoxes
         return value

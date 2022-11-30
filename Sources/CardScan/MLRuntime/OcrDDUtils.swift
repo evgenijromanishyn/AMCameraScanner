@@ -62,7 +62,7 @@ struct OcrDDUtils {
         return false
     }
 
-    static func processQuickRead(allBoxes: DetectedAllOcrBoxes) -> (String, [CGRect], Bool)? {
+    static func processQuickRead(allBoxes: DetectedAllOcrBoxes) -> (String?, [CGRect], Bool)? {
 
         if allBoxes.allBoxes.count != numOfQuickReadDigits {
             return nil
@@ -97,7 +97,7 @@ struct OcrDDUtils {
         if CreditCardUtils.isValidNumber(cardNumber: _cardNumber) {
             return (_cardNumber, boxes, true)
         }
-        return (_cardNumber, [], _cardNumber.digitsAndSpace)
+        return (nil, [], _cardNumber.digitsAndSpace)
     }
 
     static func sortBoxesInRange(
@@ -124,7 +124,7 @@ struct OcrDDUtils {
         }
     }
 
-    static func sortAndRemoveFalsePositives(allBoxes: DetectedAllOcrBoxes) -> (String, [CGRect], Bool)? {
+    static func sortAndRemoveFalsePositives(allBoxes: DetectedAllOcrBoxes) -> (String?, [CGRect], Bool)? {
 
         if (allBoxes.allBoxes.isEmpty) || (allBoxes.allBoxes.count < minimumCardDigits) {
             return nil
@@ -171,7 +171,7 @@ struct OcrDDUtils {
             return (_cardNumber, sortedBoxes, true)
         }
 
-        return (_cardNumber, [], _cardNumber.digitsAndSpace)
+        return (nil, [], _cardNumber.digitsAndSpace)
     }
 
 }
