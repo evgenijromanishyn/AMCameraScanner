@@ -476,10 +476,10 @@ public class AMCameraScanner: ScanBaseViewController {
             return
         }
 
-        UIView.animate(withDuration: 0.5) {
+        //UIView.animate(withDuration: 0.5) {
             self.roiViewHeight?.constant = 1.0 / 1.586
             self.view.layoutIfNeeded()
-        }
+        //}
 
         numberText.text = CreditCardUtils.format(number: number)
         if numberText.isHidden {
