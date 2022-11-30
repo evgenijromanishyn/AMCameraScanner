@@ -28,7 +28,11 @@ class SSDCreditCardOcr: CreditCardOcrImplementation {
         }
 
         let startTime = Date()
-        let (string, isNumber) = ocr.perform(croppedCardImage: image)
+
+        guard let (string, isNumber) = ocr.perform(croppedCardImage: image) else {
+            return CreditCardOcrPrediction.emptyPrediction(cgImage: fullImage)
+        }
+
         let duration = -startTime.timeIntervalSinceNow
         let numberBoxes = ocr.lastDetectedBoxes
 

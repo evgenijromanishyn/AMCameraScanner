@@ -165,7 +165,7 @@ import UIKit
 
         if OcrDDUtils.isQuickRead(allBoxes: DetectedOcrBoxes) {
             guard let (number, boxes, isNumber) = OcrDDUtils.processQuickRead(allBoxes: DetectedOcrBoxes)
-            else { return (nil, false) }
+            else { return nil }
             self.lastDetectedBoxes = boxes
             return (number, isNumber)
         } else {
@@ -173,7 +173,7 @@ import UIKit
                 let (number, boxes, isNumber) = OcrDDUtils.sortAndRemoveFalsePositives(
                     allBoxes: DetectedOcrBoxes
                 )
-            else { return (nil, false) }
+            else { return nil }
             self.lastDetectedBoxes = boxes
             return (number, isNumber)
         }
