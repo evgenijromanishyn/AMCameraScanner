@@ -357,7 +357,9 @@ public class AMCameraScanner: ScanBaseViewController {
         roiView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16).isActive = true
         roiView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16).isActive =
             true
-        roiView.heightAnchor.constraint(equalTo: roiView.widthAnchor, multiplier: 1.0 / 1.586)
+//        roiView.heightAnchor.constraint(equalTo: roiView.widthAnchor, multiplier: 1.0 / 1.586)
+//            .isActive = true
+        roiView.heightAnchor.constraint(equalTo: roiView.widthAnchor, multiplier: 1.0 )
             .isActive = true
         roiView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
     }
