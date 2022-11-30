@@ -75,6 +75,8 @@ public class AMCameraScanner: ScanBaseViewController {
     var privacyLinkText = UITextView()
     var privacyLinkTextHeightConstraint: NSLayoutConstraint? = nil
 
+    private var roiViewHeight: NSLayoutConstraint?
+
     var closeButton: UIButton = {
         var button = UIButton(type: .system)
         button.setTitleColor(.white, for: .normal)
@@ -359,8 +361,8 @@ public class AMCameraScanner: ScanBaseViewController {
             true
 //        roiView.heightAnchor.constraint(equalTo: roiView.widthAnchor, multiplier: 1.0 / 1.586)
 //            .isActive = true
-        roiView.heightAnchor.constraint(equalTo: roiView.widthAnchor, multiplier: 1.0 )
-            .isActive = true
+        roiViewHeight = roiView.heightAnchor.constraint(equalTo: roiView.widthAnchor, multiplier: 1.0 )
+        roiViewHeight?.isActive = true
         roiView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
     }
 
