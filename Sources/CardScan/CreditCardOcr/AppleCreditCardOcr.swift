@@ -32,7 +32,9 @@ class AppleCreditCardOcr: CreditCardOcrImplementation {
         AppleOcr.recognizeText(in: image) { results in
             for result in results {
                 let (predictedPan, isNumber) = CreditCardOcrPrediction.pan(result.text)
-                hasNumbers = isNumber
+                if !hasNumbers {
+                    hasNumbers = isNumber
+                }
                 let expiry = CreditCardOcrPrediction.likelyExpiry(result.text)
                 if let (month, year) = expiry {
                     if CreditCardUtils.isValidDate(expMonth: month, expYear: year) {
