@@ -486,6 +486,8 @@ public class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputS
     func prediction(prediction: CreditCardOcrPrediction,
                     imageData: ScannedCardImageData,
                     state: MainLoopState) {
+        if firstPanObserved { return }
+
         if !firstImageProcessed {
             firstImageProcessed = true
         }
