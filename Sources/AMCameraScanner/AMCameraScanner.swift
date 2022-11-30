@@ -458,6 +458,7 @@ public class AMCameraScanner: ScanBaseViewController {
     // MARK: -Override some ScanBase functions
     override func onScannedQR(_ code: String) {
         delegate?.userDidScanQR(code)
+        scanningEnded = true
     }
 
     override func onScannedCard(number: String,
