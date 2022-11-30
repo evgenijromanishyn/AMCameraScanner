@@ -514,7 +514,7 @@ public class AMCameraScanner: ScanBaseViewController {
                              state: MainLoopState) {
         super.prediction(prediction: prediction, imageData: imageData, state: state)
 
-        guard completedAnimation, !scanningEnded else { return }
+        guard completedAnimation || !scanningEnded else { return }
         showScannedCardDetails(prediction: prediction)
     }
 
