@@ -513,6 +513,9 @@ public class AMCameraScanner: ScanBaseViewController {
         super.prediction(prediction: prediction, imageData: imageData, state: state)
 
         guard completedAnimation else { return }
+        if !prediction.isCard && state == .ocrOnly {
+            print("TEST")
+        }
         showScannedCardDetails(prediction: prediction)
     }
 
