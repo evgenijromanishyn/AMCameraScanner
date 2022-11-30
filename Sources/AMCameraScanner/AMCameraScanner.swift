@@ -78,6 +78,7 @@ public class AMCameraScanner: ScanBaseViewController {
     private var roiViewQR: NSLayoutConstraint!
     private var roiViewCard: NSLayoutConstraint!
     private var completedAnimation = true
+    private var scanningEnded = false
 
     var closeButton: UIButton = {
         var button = UIButton(type: .system)
@@ -470,22 +471,23 @@ public class AMCameraScanner: ScanBaseViewController {
         card.image = scannedImage
 
         delegate?.userDidScanCardSimple(self, creditCard: card)
+        scanningEnded = true
     }
 
     func showScannedCardDetails(prediction: CreditCardOcrPrediction) {
         completedAnimation = false
-        
+
         roiViewQR.isActive = !prediction.isCard
         roiViewCard.isActive = prediction.isCard
-        
+
         UIView.animate(withDuration: 0.3,
                        animations: { self.view.layoutIfNeeded() },
                        completion: { (value: Bool) in
             self.completedAnimation = true
         })
-        
+
         guard let number = prediction.number else { return }
-        
+
         numberText.text = CreditCardUtils.format(number: number)
         if numberText.isHidden {
             numberText.fadeIn()
@@ -511,7 +513,7 @@ public class AMCameraScanner: ScanBaseViewController {
                              state: MainLoopState) {
         super.prediction(prediction: prediction, imageData: imageData, state: state)
 
-        guard completedAnimation else { return }
+        guard completedAnimation, !scanningEnded else { return }
         showScannedCardDetails(prediction: prediction)
     }
 

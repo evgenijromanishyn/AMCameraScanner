@@ -125,10 +125,7 @@ struct OcrDDUtils {
     }
 
     static func sortAndRemoveFalsePositives(allBoxes: DetectedAllOcrBoxes) -> (String?, [CGRect], Bool)? {
-
-        if allBoxes.allBoxes.isEmpty {
-            return nil
-        }
+        if allBoxes.allBoxes.isEmpty { return nil }
 
         var leftCordinates = [Float]()
         var topCordinates = [Float]()
