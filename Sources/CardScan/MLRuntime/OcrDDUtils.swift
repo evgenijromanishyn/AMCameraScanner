@@ -126,7 +126,7 @@ struct OcrDDUtils {
 
     static func sortAndRemoveFalsePositives(allBoxes: DetectedAllOcrBoxes) -> (String?, [CGRect], Bool)? {
 
-        if (allBoxes.allBoxes.isEmpty) || (allBoxes.allBoxes.count < minimumCardDigits) {
+        if allBoxes.allBoxes.isEmpty {
             return nil
         }
 
