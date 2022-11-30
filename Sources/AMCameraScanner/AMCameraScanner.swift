@@ -458,12 +458,10 @@ public class AMCameraScanner: ScanBaseViewController {
         delegate?.userDidScanQR(code)
     }
 
-    override func onScannedCard(
-        number: String,
-        expiryYear: String?,
-        expiryMonth: String?,
-        scannedImage: UIImage?
-    ) {
+    override func onScannedCard(number: String,
+                                expiryYear: String?,
+                                expiryMonth: String?,
+                                scannedImage: UIImage?) {
         let card = CreditCard(number: number)
         card.expiryMonth = expiryMonth
         card.expiryYear = expiryYear
@@ -478,6 +476,8 @@ public class AMCameraScanner: ScanBaseViewController {
             return
         }
 
+        roiViewHeight?.constant = 1.0 / 1.586
+        
         numberText.text = CreditCardUtils.format(number: number)
         if numberText.isHidden {
             numberText.fadeIn()
@@ -498,11 +498,9 @@ public class AMCameraScanner: ScanBaseViewController {
         }
     }
 
-    override func prediction(
-        prediction: CreditCardOcrPrediction,
-        imageData: ScannedCardImageData,
-        state: MainLoopState
-    ) {
+    override func prediction(prediction: CreditCardOcrPrediction,
+                             imageData: ScannedCardImageData,
+                             state: MainLoopState) {
         super.prediction(prediction: prediction, imageData: imageData, state: state)
 
         showScannedCardDetails(prediction: prediction)
