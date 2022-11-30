@@ -478,10 +478,9 @@ public class AMCameraScanner: ScanBaseViewController {
 
         roiViewQR?.isActive = false
         roiViewCard?.isActive = true
-        //UIView.animate(withDuration: 0.5) {
-            //self.roiViewHeight?.constant = 1.0 / 1.586
+        UIView.animate(withDuration: 0.5) {
             self.view.layoutIfNeeded()
-        //}
+        }
 
         numberText.text = CreditCardUtils.format(number: number)
         if numberText.isHidden {
