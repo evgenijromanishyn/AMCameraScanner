@@ -472,15 +472,13 @@ public class AMCameraScanner: ScanBaseViewController {
     }
 
     func showScannedCardDetails(prediction: CreditCardOcrPrediction) {
-        guard let number = prediction.number else {
-            return
-        }
-
-        roiViewQR?.isActive = false
-        roiViewCard?.isActive = true
+        roiViewQR?.isActive = !prediction.hasNumbers
+        roiViewCard?.isActive = prediction.hasNumbers
         UIView.animate(withDuration: 0.5) {
             self.view.layoutIfNeeded()
         }
+
+        guard let number = prediction.number else { return }
 
         numberText.text = CreditCardUtils.format(number: number)
         if numberText.isHidden {
