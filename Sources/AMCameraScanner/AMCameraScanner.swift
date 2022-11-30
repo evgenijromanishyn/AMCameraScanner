@@ -470,7 +470,7 @@ public class AMCameraScanner: ScanBaseViewController {
         card.image = scannedImage
 
         delegate?.userDidScanCardSimple(self, creditCard: card)
-        cancelScan()
+        print("TEST1")
     }
 
     func showScannedCardDetails(prediction: CreditCardOcrPrediction) {
@@ -514,7 +514,7 @@ public class AMCameraScanner: ScanBaseViewController {
 
         guard completedAnimation else { return }
         if !prediction.isCard && state == .ocrOnly {
-            print("TEST")
+            print("TEST2")
         }
         showScannedCardDetails(prediction: prediction)
     }
