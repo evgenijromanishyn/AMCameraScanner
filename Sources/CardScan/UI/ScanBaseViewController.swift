@@ -466,8 +466,8 @@ public class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputS
     // MARK: -OcrMainLoopComplete logic
     func complete(creditCardOcrResult: CreditCardOcrResult) {
         ocrMainLoop()?.mainLoopDelegate = nil
-        /// Stop the previewing when we are done
-        self.previewView?.videoPreviewLayer.session?.stopRunning()
+        
+        self.previewView?.session?.stopRunning()
 
         ScanBaseViewController.machineLearningQueue.async {
             self.scanEventsDelegate?.onScanComplete(scanStats: self.getScanStats())
