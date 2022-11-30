@@ -472,12 +472,8 @@ public class AMCameraScanner: ScanBaseViewController {
     }
 
     func showScannedCardDetails(prediction: CreditCardOcrPrediction) {
-        let inCard = prediction.hasNumbers && prediction.ocrCroppingRectangle != CGRect.zero
-//        if inCard {
-//            print(prediction.ocrCroppingRectangle != CGRect.zero)
-//        }
-        roiViewQR?.isActive = !inCard
-        roiViewCard?.isActive = inCard
+        roiViewQR?.isActive = !prediction.hasNumbers
+        roiViewCard?.isActive = prediction.hasNumbers
         UIView.animate(withDuration: 0.5) {
             self.view.layoutIfNeeded()
         }
