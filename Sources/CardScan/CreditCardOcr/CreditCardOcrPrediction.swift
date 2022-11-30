@@ -34,7 +34,7 @@ struct CreditCardOcrPrediction {
     let image: CGImage
     let ocrCroppingRectangle: CGRect
     let number: String?
-    let hasNumbers: Bool
+    let isCard: Bool
     let expiryMonth: String?
     let expiryYear: String?
     let name: String?
@@ -51,7 +51,7 @@ struct CreditCardOcrPrediction {
         image: CGImage,
         ocrCroppingRectangle: CGRect,
         number: String?,
-        hasNumbers: Bool,
+        isCard: Bool,
         expiryMonth: String?,
         expiryYear: String?,
         name: String?,
@@ -66,7 +66,7 @@ struct CreditCardOcrPrediction {
         self.image = image
         self.ocrCroppingRectangle = ocrCroppingRectangle
         self.number = number
-        self.hasNumbers = hasNumbers
+        self.isCard = isCard
         self.expiryMonth = expiryMonth
         self.expiryYear = expiryYear
         self.name = name
@@ -96,7 +96,7 @@ struct CreditCardOcrPrediction {
             image: self.image,
             ocrCroppingRectangle: self.ocrCroppingRectangle,
             number: self.number,
-            hasNumbers: self.hasNumbers,
+            isCard: self.isCard,
             expiryMonth: self.expiryMonth,
             expiryYear: self.expiryYear,
             name: self.name,
@@ -114,7 +114,7 @@ struct CreditCardOcrPrediction {
             image: cgImage,
             ocrCroppingRectangle: CGRect(),
             number: nil,
-            hasNumbers: false,
+            isCard: false,
             expiryMonth: nil,
             expiryYear: nil,
             name: nil,

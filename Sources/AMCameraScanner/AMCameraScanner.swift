@@ -75,8 +75,9 @@ public class AMCameraScanner: ScanBaseViewController {
     var privacyLinkText = UITextView()
     var privacyLinkTextHeightConstraint: NSLayoutConstraint? = nil
 
-    private var roiViewQR: NSLayoutConstraint?
-    private var roiViewCard: NSLayoutConstraint?
+    private var roiViewQR: NSLayoutConstraint!
+    private var roiViewCard: NSLayoutConstraint!
+    private var completedAnimation = true
 
     var closeButton: UIButton = {
         var button = UIButton(type: .system)
@@ -472,10 +473,17 @@ public class AMCameraScanner: ScanBaseViewController {
     }
 
     func showScannedCardDetails(prediction: CreditCardOcrPrediction) {
-        roiViewQR?.isActive = !prediction.hasNumbers
-        roiViewCard?.isActive = prediction.hasNumbers
-        UIView.animate(withDuration: 0.5) {
-            self.view.layoutIfNeeded()
+        if completedAnimation {
+            completedAnimation = false
+            
+            roiViewQR.isActive = !prediction.isCard
+            roiViewCard.isActive = prediction.isCard
+
+            UIView.animate(withDuration: 0.3,
+                           animations: { self.view.layoutIfNeeded() },
+                           completion: { (value: Bool) in
+                self.completedAnimation = true
+            })
         }
 
         guard let number = prediction.number else { return }

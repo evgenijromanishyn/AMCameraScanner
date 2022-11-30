@@ -29,7 +29,7 @@ class SSDCreditCardOcr: CreditCardOcrImplementation {
 
         let startTime = Date()
 
-        guard let (string, isNumber) = ocr.perform(croppedCardImage: image) else {
+        guard let (string, hasNumbers) = ocr.perform(croppedCardImage: image) else {
             return CreditCardOcrPrediction.emptyPrediction(cgImage: fullImage)
         }
 
@@ -42,7 +42,7 @@ class SSDCreditCardOcr: CreditCardOcrImplementation {
             image: image,
             ocrCroppingRectangle: ocrRoiRectangle,
             number: string,
-            hasNumbers: isNumber,
+            isCard: hasNumbers,
             expiryMonth: nil,
             expiryYear: nil,
             name: nil,

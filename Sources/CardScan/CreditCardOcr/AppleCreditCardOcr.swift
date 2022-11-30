@@ -79,7 +79,7 @@ class AppleCreditCardOcr: CreditCardOcrImplementation {
             image: image,
             ocrCroppingRectangle: roiForOcr,
             number: pan,
-            hasNumbers: hasNumbers,
+            isCard: hasNumbers,
             expiryMonth: expiryMonth,
             expiryYear: expiryYear,
             name: name,
