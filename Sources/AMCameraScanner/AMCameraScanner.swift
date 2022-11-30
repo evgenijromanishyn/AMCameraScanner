@@ -101,12 +101,6 @@ public class AMCameraScanner: ScanBaseViewController {
     var enableCameraPermissionsButton = UIButton(type: .system)
     var enableCameraPermissionsText = UILabel()
 
-    // Dynamic card details
-    var numberText = UILabel()
-    var expiryText = UILabel()
-    var nameText = UILabel()
-    var expiryLayoutView = UIView()
-
     // String
     static var enableCameraPermissionString = "String.Localized.enable_camera_access"
     static var enableCameraPermissionsDescriptionString = "String.Localized.update_phone_settings"
@@ -185,9 +179,15 @@ public class AMCameraScanner: ScanBaseViewController {
         regionOfInterestCornerRadius = 15.0
 
         let children: [UIView] = [
-            previewView, blurView, roiView, descriptionText, closeButton, torchButton, numberText,
-            expiryText, nameText, expiryLayoutView, enableCameraPermissionsButton,
-            enableCameraPermissionsText, privacyLinkText,
+            previewView,
+            blurView,
+            roiView,
+            descriptionText,
+            closeButton,
+            torchButton,
+            enableCameraPermissionsButton,
+            enableCameraPermissionsText,
+            privacyLinkText,
         ]
         for child in children {
             self.view.addSubview(child)
@@ -199,7 +199,6 @@ public class AMCameraScanner: ScanBaseViewController {
         setupCloseButtonUi()
         setupTorchButtonUi()
         setupDescriptionTextUi()
-        setupCardDetailsUi()
         setupDenyUi()
         setupPrivacyLinkTextUi()
 
@@ -238,24 +237,6 @@ public class AMCameraScanner: ScanBaseViewController {
         descriptionText.textAlignment = .center
         descriptionText.font = descriptionText.font.withSize(14)
         descriptionText.numberOfLines = 0
-    }
-
-    func setupCardDetailsUi() {
-        numberText.isHidden = true
-        numberText.textColor = .white
-        numberText.textAlignment = .center
-        numberText.font = numberText.font.withSize(48)
-        numberText.adjustsFontSizeToFitWidth = true
-        numberText.minimumScaleFactor = 0.2
-
-        expiryText.isHidden = true
-        expiryText.textColor = .white
-        expiryText.textAlignment = .center
-        expiryText.font = expiryText.font.withSize(20)
-
-        nameText.isHidden = true
-        nameText.textColor = .white
-        nameText.font = expiryText.font.withSize(20)
     }
 
     func setupDenyUi() {
@@ -325,9 +306,15 @@ public class AMCameraScanner: ScanBaseViewController {
     // MARK: -Autolayout constraints
     func setupConstraints() {
         let children: [UIView] = [
-            previewView, blurView, roiView, descriptionText, closeButton, torchButton, numberText,
-            expiryText, nameText, expiryLayoutView, enableCameraPermissionsButton,
-            enableCameraPermissionsText, privacyLinkText,
+            previewView,
+            blurView,
+            roiView,
+            descriptionText,
+            closeButton,
+            torchButton,
+            enableCameraPermissionsButton,
+            enableCameraPermissionsText,
+            privacyLinkText,
         ]
         for child in children {
             child.translatesAutoresizingMaskIntoConstraints = false
@@ -339,7 +326,6 @@ public class AMCameraScanner: ScanBaseViewController {
         setupCloseButtonConstraints()
         setupTorchButtonConstraints()
         setupDescriptionTextConstraints()
-        setupCardDetailsConstraints()
         setupDenyConstraints()
         setupPrivacyLinkTextConstraints()
 
@@ -387,31 +373,8 @@ public class AMCameraScanner: ScanBaseViewController {
             true
         descriptionText.trailingAnchor.constraint(equalTo: roiView.trailingAnchor)
             .isActive = true
-        descriptionText.topAnchor.constraint(equalTo: expiryLayoutView.bottomAnchor, constant: 24).isActive =
+        descriptionText.topAnchor.constraint(equalTo: roiView.bottomAnchor, constant: 24).isActive =
             true
-    }
-
-    func setupCardDetailsConstraints() {
-        numberText.leadingAnchor.constraint(equalTo: roiView.leadingAnchor, constant: 32).isActive =
-            true
-        numberText.trailingAnchor.constraint(equalTo: roiView.trailingAnchor, constant: -32)
-            .isActive = true
-        numberText.centerYAnchor.constraint(equalTo: roiView.centerYAnchor).isActive = true
-
-        nameText.leadingAnchor.constraint(equalTo: numberText.leadingAnchor).isActive = true
-        nameText.bottomAnchor.constraint(equalTo: roiView.bottomAnchor, constant: -16).isActive =
-            true
-
-        expiryLayoutView.topAnchor.constraint(equalTo: numberText.bottomAnchor).isActive = true
-        expiryLayoutView.bottomAnchor.constraint(equalTo: nameText.topAnchor).isActive = true
-        expiryLayoutView.leadingAnchor.constraint(equalTo: numberText.leadingAnchor).isActive = true
-        expiryLayoutView.trailingAnchor.constraint(equalTo: numberText.trailingAnchor).isActive =
-            true
-
-        expiryText.leadingAnchor.constraint(equalTo: expiryLayoutView.leadingAnchor).isActive = true
-        expiryText.trailingAnchor.constraint(equalTo: expiryLayoutView.trailingAnchor).isActive =
-            true
-        expiryText.centerYAnchor.constraint(equalTo: expiryLayoutView.centerYAnchor).isActive = true
     }
 
     func setupDenyConstraints() {
@@ -472,7 +435,9 @@ public class AMCameraScanner: ScanBaseViewController {
         delegate?.userDidScanCardSimple(self, creditCard: card)
     }
 
-    func showScannedCardDetails(prediction: CreditCardOcrPrediction) {
+    func updateRoiView(prediction: CreditCardOcrPrediction) {
+        guard completedAnimation else { return }
+        
         completedAnimation = false
 
         roiViewQR.isActive = !prediction.isCard
@@ -483,36 +448,13 @@ public class AMCameraScanner: ScanBaseViewController {
                        completion: { (value: Bool) in
             self.completedAnimation = true
         })
-
-        guard let number = prediction.number else { return }
-
-        numberText.text = CreditCardUtils.format(number: number)
-        if numberText.isHidden {
-            numberText.fadeIn()
-        }
-
-        if let expiry = prediction.expiryForDisplay {
-            expiryText.text = expiry
-            if expiryText.isHidden {
-                expiryText.fadeIn()
-            }
-        }
-
-        if let name = prediction.name {
-            nameText.text = name
-            if nameText.isHidden {
-                nameText.fadeIn()
-            }
-        }
     }
 
     override func prediction(prediction: CreditCardOcrPrediction,
                              imageData: ScannedCardImageData,
                              state: MainLoopState) {
         super.prediction(prediction: prediction, imageData: imageData, state: state)
-
-        guard completedAnimation else { return }
-        showScannedCardDetails(prediction: prediction)
+        updateRoiView(prediction: prediction)
     }
 
     override func onCameraPermissionDenied(showedPrompt: Bool) {
