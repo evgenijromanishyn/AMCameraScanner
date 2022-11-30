@@ -473,21 +473,19 @@ public class AMCameraScanner: ScanBaseViewController {
     }
 
     func showScannedCardDetails(prediction: CreditCardOcrPrediction) {
-        if completedAnimation {
-            completedAnimation = false
-
-            roiViewQR.isActive = !prediction.isCard
-            roiViewCard.isActive = prediction.isCard
-
-            UIView.animate(withDuration: 0.3,
-                           animations: { self.view.layoutIfNeeded() },
-                           completion: { (value: Bool) in
-                self.completedAnimation = true
-            })
-        }
-
+        completedAnimation = false
+        
+        roiViewQR.isActive = !prediction.isCard
+        roiViewCard.isActive = prediction.isCard
+        
+        UIView.animate(withDuration: 0.3,
+                       animations: { self.view.layoutIfNeeded() },
+                       completion: { (value: Bool) in
+            self.completedAnimation = true
+        })
+        
         guard let number = prediction.number else { return }
-
+        
         numberText.text = CreditCardUtils.format(number: number)
         if numberText.isHidden {
             numberText.fadeIn()
@@ -513,6 +511,7 @@ public class AMCameraScanner: ScanBaseViewController {
                              state: MainLoopState) {
         super.prediction(prediction: prediction, imageData: imageData, state: state)
 
+        guard completedAnimation else { return }
         showScannedCardDetails(prediction: prediction)
     }
 

@@ -8,5 +8,8 @@
 import Foundation
 
 extension String {
-    var digitsAndSpace: Bool { self.reduce(true) { $0 && (($1 >= "0" && $1 <= "9") || $1 == " ") } }
+    var digitsAndSpace: Bool {
+        return "\(Int(self))".count >= 4
+        //self.reduce(true) { $0 && (($1 >= "0" && $1 <= "9") || $1 == " ") }
+    }
 }
