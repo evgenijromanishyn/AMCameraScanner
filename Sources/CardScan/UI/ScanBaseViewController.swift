@@ -204,7 +204,7 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
 
     // you must call setupOnViewDidLoad before calling this function and you have to call
     // this function to get the camera going
-    func startCameraPreview() {
+    public func startCameraPreview() {
         self.videoFeed.requestCameraAccess(permissionDelegate: self)
     }
 
@@ -251,12 +251,12 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
         #endif
     }
 
-    func setupOnViewDidLoad( regionOfInterestLabel: UIView,
-                             blurView: BlurView,
-                             previewView: PreviewView,
-                             cornerView: CornerView?,
-                             debugImageView: UIImageView?,
-                             torchLevel: Float?) {
+    func setupOnViewDidLoad(regionOfInterestLabel: UIView,
+                            blurView: BlurView,
+                            previewView: PreviewView,
+                            cornerView: CornerView?,
+                            debugImageView: UIImageView?,
+                            torchLevel: Float?) {
         self.regionOfInterestLabel = regionOfInterestLabel
         self.blurView = blurView
         self.previewView = previewView
