@@ -28,6 +28,7 @@ class VideoFeed {
     func requestCameraAccess(permissionDelegate: AfterPermissions?) {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
+            print(self.sessionQueue)
             self.sessionQueue.resume()
             DispatchQueue.main.async {
                 permissionDelegate?.permissionDidComplete(granted: true, showedPrompt: false)
