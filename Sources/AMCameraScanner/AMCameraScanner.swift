@@ -86,7 +86,7 @@ public class AMCameraScanner: ScanBaseViewController {
         return button
     }()
 
-    var torchButton: UIButton = {
+    var flashButton: UIButton = {
         var button = UIButton(type: .system)
         button.setTitleColor(.white, for: .normal)
         button.tintColor = .white
@@ -96,6 +96,9 @@ public class AMCameraScanner: ScanBaseViewController {
         button.clipsToBounds = true
         return button
     }()
+
+    open var flashOn: UIImage?
+    open var flashOff: UIImage?
 
     private var debugView: UIImageView?
     var enableCameraPermissionsButton = UIButton(type: .system)
@@ -158,7 +161,7 @@ public class AMCameraScanner: ScanBaseViewController {
     //  Figure out a better way of allow custom buttons programmatically instead of whole UI buttons.
     public override func viewDidDisappear(_ animated: Bool) {
         closeButton.removeTarget(self, action: #selector(cancelButtonPress), for: .touchUpInside)
-        torchButton.removeTarget(self, action: #selector(torchButtonPress), for: .touchUpInside)
+        flashButton.removeTarget(self, action: #selector(flashButtonPress), for: .touchUpInside)
     }
 
     @available(iOS 13.0, *)
@@ -184,7 +187,7 @@ public class AMCameraScanner: ScanBaseViewController {
             roiView,
             descriptionText,
             closeButton,
-            torchButton,
+            flashButton,
             enableCameraPermissionsButton,
             enableCameraPermissionsText,
             privacyLinkText,
@@ -197,7 +200,7 @@ public class AMCameraScanner: ScanBaseViewController {
         setupBlurViewUi()
         setupRoiViewUi()
         setupCloseButtonUi()
-        setupTorchButtonUi()
+        setupflashButtonUi()
         setupDescriptionTextUi()
         setupDenyUi()
         setupPrivacyLinkTextUi()
@@ -228,8 +231,8 @@ public class AMCameraScanner: ScanBaseViewController {
         closeButton.addTarget(self, action: #selector(cancelButtonPress), for: .touchUpInside)
     }
 
-    func setupTorchButtonUi() {
-        torchButton.addTarget(self, action: #selector(torchButtonPress), for: .touchUpInside)
+    func setupflashButtonUi() {
+        flashButton.addTarget(self, action: #selector(flashButtonPress), for: .touchUpInside)
     }
 
     func setupDescriptionTextUi() {
@@ -311,7 +314,7 @@ public class AMCameraScanner: ScanBaseViewController {
             roiView,
             descriptionText,
             closeButton,
-            torchButton,
+            flashButton,
             enableCameraPermissionsButton,
             enableCameraPermissionsText,
             privacyLinkText,
@@ -324,7 +327,7 @@ public class AMCameraScanner: ScanBaseViewController {
         setupBlurViewConstraints()
         setupRoiViewConstraints()
         setupCloseButtonConstraints()
-        setupTorchButtonConstraints()
+        setupflashButtonConstraints()
         setupDescriptionTextConstraints()
         setupDenyConstraints()
         setupPrivacyLinkTextConstraints()
@@ -359,13 +362,13 @@ public class AMCameraScanner: ScanBaseViewController {
         closeButton.leadingAnchor.constraint(equalTo: margins.leadingAnchor).isActive = true
     }
 
-    func setupTorchButtonConstraints() {
+    func setupflashButtonConstraints() {
         let margins = view.layoutMarginsGuide
-        torchButton.bottomAnchor.constraint(equalTo: margins.bottomAnchor, constant: -36).isActive =
+        flashButton.bottomAnchor.constraint(equalTo: margins.bottomAnchor, constant: -36).isActive =
             true
-        torchButton.leadingAnchor.constraint(equalTo: margins.leadingAnchor).isActive = true
-        torchButton.heightAnchor.constraint(equalToConstant: 48).isActive = true
-        torchButton.widthAnchor.constraint(equalToConstant: 48).isActive = true
+        flashButton.leadingAnchor.constraint(equalTo: margins.leadingAnchor).isActive = true
+        flashButton.heightAnchor.constraint(equalToConstant: 48).isActive = true
+        flashButton.widthAnchor.constraint(equalToConstant: 48).isActive = true
     }
 
     func setupDescriptionTextConstraints() {
@@ -437,7 +440,7 @@ public class AMCameraScanner: ScanBaseViewController {
 
     func updateRoiView(prediction: CreditCardOcrPrediction) {
         guard completedAnimation else { return }
-        
+
         completedAnimation = false
 
         roiViewQR.isActive = !prediction.isCard
@@ -459,7 +462,7 @@ public class AMCameraScanner: ScanBaseViewController {
 
     override func onCameraPermissionDenied(showedPrompt: Bool) {
         descriptionText.isHidden = true
-        torchButton.isHidden = true
+        flashButton.isHidden = true
 
         enableCameraPermissionsButton.isHidden = false
         enableCameraPermissionsText.isHidden = false
@@ -472,7 +475,7 @@ public class AMCameraScanner: ScanBaseViewController {
         self.cancelScan()
     }
 
-    @objc func torchButtonPress() {
+    @objc func flashButtonPress() {
         toggleTorch()
     }
 
