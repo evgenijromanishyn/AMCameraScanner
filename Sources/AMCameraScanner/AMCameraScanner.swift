@@ -477,6 +477,9 @@ public class AMCameraScanner: ScanBaseViewController {
 
     @objc func flashButtonPress() {
         toggleTorch()
+
+        let flashImage = self.isTorchOn() ? flashOn : flashOff
+        flashButton.setImage(flashImage, for: .normal)
     }
 
     /// Warning: if the user navigates to settings and updates the setting, it'll suspend your app.
