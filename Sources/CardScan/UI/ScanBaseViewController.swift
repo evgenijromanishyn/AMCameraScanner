@@ -566,13 +566,18 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
 
 extension ScanBaseViewController: AVCaptureMetadataOutputObjectsDelegate {
 
+    func pauseScanning() {
+        self.videoFeed.pauseSession()
+        self.previewView?.videoPreviewLayer.session?.stopRunning()
+    }
+
     public func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
 
         guard let metadataObject = metadataObjects.first,
               let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject,
               let stringValue = readableObject.stringValue else { return }
 
-        self.videoFeed.pauseSession()
+        self.pauseScanning()
 //        ocrMainLoop()?.mainLoopDelegate = nil
 //        self.previewView?.videoPreviewLayer.session?.stopRunning()
 //
