@@ -463,8 +463,19 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
         }
     }
 
+    public func resumeScanning() {
+        self.startCameraPreview()
+        self.previewView?.videoPreviewLayer.session?.startRunning()
+    }
+
+    func pauseScanning() {
+        self.videoFeed.pauseSession()
+        self.previewView?.videoPreviewLayer.session?.stopRunning()
+    }
+
     // MARK: -OcrMainLoopComplete logic
     func complete(creditCardOcrResult: CreditCardOcrResult) {
+        self.pauseScanning()
 
 //        ocrMainLoop()?.mainLoopDelegate = nil
 //        self.previewView?.session?.stopRunning()
@@ -565,17 +576,6 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
 }
 
 extension ScanBaseViewController: AVCaptureMetadataOutputObjectsDelegate {
-
-
-    public func resumeScanning() {
-        self.startCameraPreview()
-        self.previewView?.videoPreviewLayer.session?.startRunning()
-    }
-
-    func pauseScanning() {
-        self.videoFeed.pauseSession()
-        self.previewView?.videoPreviewLayer.session?.stopRunning()
-    }
 
     public func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
 
