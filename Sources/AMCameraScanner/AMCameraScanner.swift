@@ -62,7 +62,7 @@ public protocol AMCameraScannerDelegate: AnyObject {
     func userDidScanQR(_ code: String)
 }
 
-public class AMCameraScanner: ScanBaseViewController {
+public open class AMCameraScanner: ScanBaseViewController {
 
     // used by ScanBase
     var previewView: PreviewView = PreviewView()
