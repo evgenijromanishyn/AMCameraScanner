@@ -417,7 +417,7 @@ open class AMCameraScanner: ScanBaseViewController {
     }
 
     // MARK: -Override some ScanBase functions
-    override func onScannedQR(_ code: String) {
+    override open func onScannedQR(_ code: String) {
         delegate?.userDidScanQR(code)
     }
 
