@@ -88,13 +88,7 @@ public class AMCameraScanner: ScanBaseViewController {
 
     var flashButton: UIButton = {
         var button = UIButton(type: .custom)
-//        button.setTitleColor(.white, for: .normal)
-//        button.tintColor = .white
-//        button.backgroundColor = .init(white: 0.0, alpha: 0.5)
-//        button.layer.cornerRadius = 24
-//        button.layer.masksToBounds = true
-//        button.clipsToBounds = true
-        return button
+        return UIButton(type: .custom)
     }()
 
     open var flashOn: UIImage?
