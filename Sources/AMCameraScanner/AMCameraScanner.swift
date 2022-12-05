@@ -92,7 +92,9 @@ open class AMCameraScanner: ScanBaseViewController {
     }()
 
     open var flashOn: UIImage?
-    open var flashOff: UIImage?
+    open var flashOff: UIImage? {
+        didSet { flashButton.setImage(flashOff, for: .normal) }
+    }
 
     private var debugView: UIImageView?
     var enableCameraPermissionsButton = UIButton(type: .system)
@@ -174,7 +176,6 @@ open class AMCameraScanner: ScanBaseViewController {
     func setupUiComponents() {
         view.backgroundColor = .white
         regionOfInterestCornerRadius = 15.0
-        flashButton.setImage(flashOff, for: .normal)
 
         let children: [UIView] = [
             previewView,
