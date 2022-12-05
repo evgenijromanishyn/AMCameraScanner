@@ -394,6 +394,8 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
 
     public override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
+        stopScanning()
+
         ScanBaseViewController.isAppearing = false
     }
 
@@ -463,26 +465,28 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
         }
     }
 
+    func pauseScanning() {
+        self.videoFeed.pauseSession()
+        self.previewView?.videoPreviewLayer.session?.stopRunning()
+    }
+
     public func resumeScanning() {
         self.startCameraPreview()
         self.previewView?.videoPreviewLayer.session?.startRunning()
     }
 
-    func pauseScanning() {
-        self.videoFeed.pauseSession()
-        self.previewView?.videoPreviewLayer.session?.stopRunning()
+    func stopScanning() {
+        ocrMainLoop()?.mainLoopDelegate = nil
+        self.previewView?.session?.stopRunning()
     }
 
     // MARK: -OcrMainLoopComplete logic
     func complete(creditCardOcrResult: CreditCardOcrResult) {
         self.pauseScanning()
 
-//        ocrMainLoop()?.mainLoopDelegate = nil
-//        self.previewView?.session?.stopRunning()
-//
-//        ScanBaseViewController.machineLearningQueue.async {
-//            self.scanEventsDelegate?.onScanComplete(scanStats: self.getScanStats())
-//        }
+        ScanBaseViewController.machineLearningQueue.async {
+            self.scanEventsDelegate?.onScanComplete(scanStats: self.getScanStats())
+        }
 
         // hack to work around having to change our  interface
         predictedName = creditCardOcrResult.name
@@ -584,13 +588,6 @@ extension ScanBaseViewController: AVCaptureMetadataOutputObjectsDelegate {
               let stringValue = readableObject.stringValue else { return }
 
         self.pauseScanning()
-//        ocrMainLoop()?.mainLoopDelegate = nil
-//        self.previewView?.videoPreviewLayer.session?.stopRunning()
-//
-//        ScanBaseViewController.machineLearningQueue.async {
-//            self.scanEventsDelegate?.onScanComplete(scanStats: self.getScanStats())
-//        }
-
         self.onScannedQR(stringValue)
     }
 }
