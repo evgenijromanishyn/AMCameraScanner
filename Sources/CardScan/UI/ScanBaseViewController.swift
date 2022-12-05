@@ -465,13 +465,13 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
 
     // MARK: -OcrMainLoopComplete logic
     func complete(creditCardOcrResult: CreditCardOcrResult) {
-        ocrMainLoop()?.mainLoopDelegate = nil
-        
-        self.previewView?.session?.stopRunning()
 
-        ScanBaseViewController.machineLearningQueue.async {
-            self.scanEventsDelegate?.onScanComplete(scanStats: self.getScanStats())
-        }
+//        ocrMainLoop()?.mainLoopDelegate = nil
+//        self.previewView?.session?.stopRunning()
+//
+//        ScanBaseViewController.machineLearningQueue.async {
+//            self.scanEventsDelegate?.onScanComplete(scanStats: self.getScanStats())
+//        }
 
         // hack to work around having to change our  interface
         predictedName = creditCardOcrResult.name
@@ -572,12 +572,13 @@ extension ScanBaseViewController: AVCaptureMetadataOutputObjectsDelegate {
               let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject,
               let stringValue = readableObject.stringValue else { return }
 
-        ocrMainLoop()?.mainLoopDelegate = nil
-        self.previewView?.videoPreviewLayer.session?.stopRunning()
-
-        ScanBaseViewController.machineLearningQueue.async {
-            self.scanEventsDelegate?.onScanComplete(scanStats: self.getScanStats())
-        }
+        self.videoFeed.pauseSession()
+//        ocrMainLoop()?.mainLoopDelegate = nil
+//        self.previewView?.videoPreviewLayer.session?.stopRunning()
+//
+//        ScanBaseViewController.machineLearningQueue.async {
+//            self.scanEventsDelegate?.onScanComplete(scanStats: self.getScanStats())
+//        }
 
         self.onScannedQR(stringValue)
     }
