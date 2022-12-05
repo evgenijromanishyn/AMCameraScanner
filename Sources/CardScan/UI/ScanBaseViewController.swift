@@ -6,7 +6,7 @@ protocol TestingImageDataSource: AnyObject {
     func nextSquareAndFullImage() -> CGImage?
 }
 
-public class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate,
+open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate,
                               AfterPermissions, OcrMainLoopDelegate
 {
 
@@ -87,7 +87,7 @@ public class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputS
         super.init(nibName: nil, bundle: nil)
     }
 
-    required init?(
+    required public init?(
         coder: NSCoder
     ) {
         fatalError("init(coder:) has not been implemented")

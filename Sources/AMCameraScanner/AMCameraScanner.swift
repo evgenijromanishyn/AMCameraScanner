@@ -62,7 +62,7 @@ public protocol AMCameraScannerDelegate: AnyObject {
     func userDidScanQR(_ code: String)
 }
 
-public open class AMCameraScanner: ScanBaseViewController {
+open class AMCameraScanner: ScanBaseViewController {
 
     // used by ScanBase
     var previewView: PreviewView = PreviewView()
@@ -120,7 +120,7 @@ public open class AMCameraScanner: ScanBaseViewController {
         }
     }
 
-    required init?(
+    required public init?(
         coder: NSCoder
     ) {
         fatalError("init(coder:) has not been implemented")
