@@ -204,7 +204,7 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
 
     // you must call setupOnViewDidLoad before calling this function and you have to call
     // this function to get the camera going
-    public func startCameraPreview() {
+    func startCameraPreview() {
         self.videoFeed.requestCameraAccess(permissionDelegate: self)
     }
 
@@ -565,6 +565,12 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
 }
 
 extension ScanBaseViewController: AVCaptureMetadataOutputObjectsDelegate {
+
+
+    public func resumeScanning() {
+        self.startCameraPreview()
+        self.previewView?.videoPreviewLayer.session?.startRunning()
+    }
 
     func pauseScanning() {
         self.videoFeed.pauseSession()
