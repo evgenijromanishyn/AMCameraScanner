@@ -435,7 +435,7 @@ open class AMCameraScanner: ScanBaseViewController {
         flashButton.setImage(flashImage, for: .normal)
     }
 
-    @objc func galleryButtonPress() {
+    @objc public func galleryButtonPress() {
         self.pauseScanning()
 
         let imagePicker = UIImagePickerController()
