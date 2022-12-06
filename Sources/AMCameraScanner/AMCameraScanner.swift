@@ -376,6 +376,8 @@ open class AMCameraScanner: ScanBaseViewController {
         delegate?.userDidScanQR(code)
     }
 
+    override open func onFailScanImage(_ sourceType: ImageourceType) {}
+
     override func onScannedCard(number: String,
                                 expiryYear: String?,
                                 expiryMonth: String?,
