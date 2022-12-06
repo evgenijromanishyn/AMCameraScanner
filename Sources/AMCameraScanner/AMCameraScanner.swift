@@ -482,8 +482,9 @@ extension AMCameraScanner: UIImagePickerControllerDelegate, UINavigationControll
               let features = detector.features(in: ciImage) as? [CIQRCodeFeature],
               let qrCodeFeature = features.first,
               let qrContent = qrCodeFeature.messageString else {
-            print("No QR-code")
-            self.dismiss(animated: true, completion: nil)
+            self.dismiss(animated: true) {
+                self.onFailScanImage(.gallery)
+            }
             return
         }
 

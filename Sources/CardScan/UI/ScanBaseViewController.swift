@@ -79,6 +79,7 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
         scannedImage: UIImage?
     ) {}
     func onScannedQR(_ code: String, sourceType: ImageourceType) {}
+    func onFailScanImage(_ sourceType: ImageourceType) {}
     func showCardNumber(_ number: String, expiry: String?) {}
     func showWrongCard(number: String?, expiry: String?, name: String?) {}
     func showNoCard() {}
