@@ -543,6 +543,6 @@ extension AMCameraScanner: UIImagePickerControllerDelegate, UINavigationControll
             print("No QR-code")
             return
         }
-        print(qrContent)
+        self.onScannedQR(qrContent)
     }
 }
