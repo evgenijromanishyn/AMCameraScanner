@@ -531,8 +531,6 @@ extension AMCameraScanner: UIImagePickerControllerDelegate, UINavigationControll
     }
 
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-        self.dismiss(animated: true, completion: nil)
-
 
         guard let image = (info[UIImagePickerController.InfoKey.originalImage] as? UIImage),
               let detector = CIDetector(ofType: CIDetectorTypeQRCode, context: nil, options: [CIDetectorAccuracy: CIDetectorAccuracyHigh]),
@@ -541,8 +539,12 @@ extension AMCameraScanner: UIImagePickerControllerDelegate, UINavigationControll
               let qrCodeFeature = features.first,
               let qrContent = qrCodeFeature.messageString else {
             print("No QR-code")
+            self.dismiss(animated: true, completion: nil)
             return
         }
-        self.onScannedQR(qrContent)
+
+        self.dismiss(animated: true) {
+            self.onScannedQR(qrContent)
+        }
     }
 }
