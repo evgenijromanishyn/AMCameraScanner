@@ -490,7 +490,14 @@ open class AMCameraScanner: ScanBaseViewController {
     }
 
     @objc func galleryButtonPress() {
-        print("galleryButtonPress")
+        self.pauseScanning()
+
+        let imagePicker = UIImagePickerController()
+        imagePicker.modalPresentationStyle = .overFullScreen
+        imagePicker.sourceType = .photoLibrary
+        imagePicker.allowsEditing = false
+        imagePicker.delegate = self
+        self.present(imagePicker, animated: true, completion: nil)
     }
 
     /// Warning: if the user navigates to settings and updates the setting, it'll suspend your app.
@@ -511,5 +518,31 @@ extension UIView {
         self.leadingAnchor.constraint(equalTo: otherView.leadingAnchor).isActive = true
         self.trailingAnchor.constraint(equalTo: otherView.trailingAnchor).isActive = true
         self.bottomAnchor.constraint(equalTo: otherView.bottomAnchor).isActive = true
+    }
+}
+
+// MARK: - UIImagePickerControllerDelegate
+
+extension AMCameraScanner: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+
+    public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        self.dismiss(animated: true, completion: nil)
+        self.resumeScanning()
+    }
+
+    public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+        self.dismiss(animated: true, completion: nil)
+
+
+        guard let image = (info[UIImagePickerController.InfoKey.originalImage] as? UIImage),
+              let detector = CIDetector(ofType: CIDetectorTypeQRCode, context: nil, options: [CIDetectorAccuracy: CIDetectorAccuracyHigh]),
+              let ciImage = CIImage(image: image),
+              let features = detector.features(in: ciImage) as? [CIQRCodeFeature],
+              let qrCodeFeature = features.first,
+              let qrContent = qrCodeFeature.messageString else {
+            print("No QR-code")
+            return
+        }
+        print(qrContent)
     }
 }
