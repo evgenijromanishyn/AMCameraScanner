@@ -86,16 +86,15 @@ open class AMCameraScanner: ScanBaseViewController {
         return button
     }()
 
-    var flashButton: UIButton = {
-        var button = UIButton(type: .custom)
-        return UIButton(type: .custom)
-    }()
+    var flashButton = UIButton(type: .custom)
 
     open var flashOn: UIImage?
     open var flashOff: UIImage? {
         didSet { flashButton.setImage(flashOff, for: .normal) }
     }
 
+    var galleryButton = UIButton(type: .custom)
+    
     private var debugView: UIImageView?
     var enableCameraPermissionsButton = UIButton(type: .system)
     var enableCameraPermissionsText = UILabel()
@@ -156,8 +155,11 @@ open class AMCameraScanner: ScanBaseViewController {
     //
     //  Figure out a better way of allow custom buttons programmatically instead of whole UI buttons.
     public override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+
         closeButton.removeTarget(self, action: #selector(cancelButtonPress), for: .touchUpInside)
         flashButton.removeTarget(self, action: #selector(flashButtonPress), for: .touchUpInside)
+        galleryButton.removeTarget(self, action: #selector(galleryButtonPress), for: .touchUpInside)
     }
 
     @available(iOS 13.0, *)
@@ -184,6 +186,7 @@ open class AMCameraScanner: ScanBaseViewController {
             descriptionText,
             closeButton,
             flashButton,
+            galleryButton,
             enableCameraPermissionsButton,
             enableCameraPermissionsText,
             privacyLinkText,
@@ -195,8 +198,7 @@ open class AMCameraScanner: ScanBaseViewController {
         setupPreviewViewUi()
         setupBlurViewUi()
         setupRoiViewUi()
-        setupCloseButtonUi()
-        setupflashButtonUi()
+        addButtonTargets()
         setupDescriptionTextUi()
         setupDenyUi()
         setupPrivacyLinkTextUi()
@@ -223,12 +225,10 @@ open class AMCameraScanner: ScanBaseViewController {
         roiView.layer.borderColor = UIColor.white.cgColor
     }
 
-    func setupCloseButtonUi() {
+    func addButtonTargets() {
         closeButton.addTarget(self, action: #selector(cancelButtonPress), for: .touchUpInside)
-    }
-
-    func setupflashButtonUi() {
         flashButton.addTarget(self, action: #selector(flashButtonPress), for: .touchUpInside)
+        galleryButton.addTarget(self, action: #selector(galleryButtonPress), for: .touchUpInside)
     }
 
     func setupDescriptionTextUi() {
@@ -311,6 +311,7 @@ open class AMCameraScanner: ScanBaseViewController {
             descriptionText,
             closeButton,
             flashButton,
+            galleryButton,
             enableCameraPermissionsButton,
             enableCameraPermissionsText,
             privacyLinkText,
@@ -324,6 +325,7 @@ open class AMCameraScanner: ScanBaseViewController {
         setupRoiViewConstraints()
         setupCloseButtonConstraints()
         setupflashButtonConstraints()
+        setupgalleryButtonConstraints()
         setupDescriptionTextConstraints()
         setupDenyConstraints()
         setupPrivacyLinkTextConstraints()
@@ -365,6 +367,15 @@ open class AMCameraScanner: ScanBaseViewController {
         flashButton.leadingAnchor.constraint(equalTo: margins.leadingAnchor).isActive = true
         flashButton.heightAnchor.constraint(equalToConstant: 48).isActive = true
         flashButton.widthAnchor.constraint(equalToConstant: 48).isActive = true
+    }
+
+    func setupgalleryButtonConstraints() {
+        let margins = view.layoutMarginsGuide
+        galleryButton.bottomAnchor.constraint(equalTo: margins.bottomAnchor, constant: -36).isActive =
+            true
+        galleryButton.trailingAnchor.constraint(equalTo: margins.trailingAnchor).isActive = true
+        galleryButton.heightAnchor.constraint(equalToConstant: 48).isActive = true
+        galleryButton.widthAnchor.constraint(equalToConstant: 48).isActive = true
     }
 
     func setupDescriptionTextConstraints() {
@@ -476,6 +487,10 @@ open class AMCameraScanner: ScanBaseViewController {
 
         let flashImage = self.isTorchOn() ? flashOn : flashOff
         flashButton.setImage(flashImage, for: .normal)
+    }
+
+    @objc func galleryButtonPress() {
+        print("galleryButtonPress")
     }
 
     /// Warning: if the user navigates to settings and updates the setting, it'll suspend your app.
