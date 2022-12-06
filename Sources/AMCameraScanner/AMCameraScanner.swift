@@ -1,60 +1,4 @@
-
 import UIKit
-
-// This class is all programmatic UI with a small bit of logic to handle
-// the events that ScanBaseViewController expects subclasses to implement.
-// Our goal is to have a fully featured Card Scan implementation with a
-// minimal UI that people can customize fully. You can use this directly or
-// you can subclass and customize it. If you'd like to use an off-the-shelf
-// design as well, we suggest using the `ScanViewController`, which uses
-// mature and well tested UI design patterns.
-//
-// The default UI looks something like this, with most of the constraints
-// shown:
-//
-// ------------------------------------
-// |   |                          |   |
-// |-Cancel                     Torch-|
-// |                                  |
-// |                                  |
-// |                                  |
-// |                                  |
-// |                                  |
-// |------------Scan Card-------------|
-// |                |                 |
-// |  ------------------------------  |
-// | |                              | |
-// | |                              | |
-// | |                              | |
-// | |--4242    4242   4242   4242--| |
-// | ||           05/23             | |
-// | ||-Sam King                    | |
-// | |     |                        | |
-// |  ------------------------------  |
-// | |              |               | |
-// | |              |               | |
-// | |   Enable camera permissions  | |
-// | |              |               | |
-// | |              |               | |
-// | |---To scan your card you...---| |
-// |                                  |
-// |                                  |
-// |                                  |
-// ------------------------------------
-//
-// For the UI we separate out the key components into three parts:
-// - Five `*String` variables that we use to set the copy
-// - For each component or group of components we have:
-//   - `setup*Ui` functions for setting the visual look and feel
-//   - `setup*Constraints for setting up autolayout
-// - We have top level `setupUiComponents` and `setupConstraints` functions that do
-//   a small bit of setup and call the appropriate setup functions for each
-//   components
-//
-// And to customize the UI you can either override any of these functions or you
-// can access components directly to adjust. Also, you're welcome to copy and paste
-// this code and customize it to fit your needs -- we're fine with whatever makes
-// the most sense for your app.
 
 public protocol AMCameraScannerDelegate: AnyObject {
     func userDidCancelSimple(_ scanViewController: AMCameraScanner)
@@ -428,7 +372,7 @@ open class AMCameraScanner: ScanBaseViewController {
     }
 
     // MARK: -Override some ScanBase functions
-    override open func onScannedQR(_ code: String) {
+    override open func onScannedQR(_ code: String, sourceType: ImageourceType) {
         delegate?.userDidScanQR(code)
     }
 
@@ -544,7 +488,7 @@ extension AMCameraScanner: UIImagePickerControllerDelegate, UINavigationControll
         }
 
         self.dismiss(animated: true) {
-            self.onScannedQR(qrContent)
+            self.onScannedQR(qrContent, sourceType: .gallery)
         }
     }
 }

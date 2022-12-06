@@ -6,6 +6,11 @@ protocol TestingImageDataSource: AnyObject {
     func nextSquareAndFullImage() -> CGImage?
 }
 
+public enum ImageourceType {
+    case outside
+    case gallery
+}
+
 open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate,
                               AfterPermissions, OcrMainLoopDelegate
 {
@@ -73,7 +78,7 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
         expiryMonth: String?,
         scannedImage: UIImage?
     ) {}
-    func onScannedQR(_ code: String) {}
+    func onScannedQR(_ code: String, sourceType: ImageourceType) {}
     func showCardNumber(_ number: String, expiry: String?) {}
     func showWrongCard(number: String?, expiry: String?, name: String?) {}
     func showNoCard() {}
@@ -588,6 +593,6 @@ extension ScanBaseViewController: AVCaptureMetadataOutputObjectsDelegate {
               let stringValue = readableObject.stringValue else { return }
 
         self.pauseScanning()
-        self.onScannedQR(stringValue)
+        self.onScannedQR(stringValue, sourceType: .outside)
     }
 }
