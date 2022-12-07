@@ -478,27 +478,16 @@ extension AMCameraScanner: UIImagePickerControllerDelegate, UINavigationControll
 
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
 
-        var detectedValue: String? = nil
-        defer {
-            self.dismiss(animated: true) {
-                if let value = detectedValue {
-                    self.onScannedQR(value, sourceType: .gallery)
-                } else {
-                    self.onFailScanImage(.gallery)
-                }
-            }
-        }
-
-        guard let image = (info[UIImagePickerController.InfoKey.originalImage] as? UIImage),
-              let ciImage = CIImage(image: image) else {
-            return
-        }
-
-        if let detector = CIDetector(ofType: CIDetectorTypeQRCode, context: nil, options: [CIDetectorAccuracy: CIDetectorAccuracyHigh]),
+        if let image = (info[UIImagePickerController.InfoKey.originalImage] as? UIImage),
+           let ciImage = CIImage(image: image),
+           let detector = CIDetector(ofType: CIDetectorTypeQRCode, context: nil, options: [CIDetectorAccuracy: CIDetectorAccuracyHigh]),
            let features = detector.features(in: ciImage) as? [CIQRCodeFeature],
            let qrCodeFeature = features.first,
            let qrContent = qrCodeFeature.messageString {
-            detectedValue = qrContent
+            self.onScannedQR(qrContent, sourceType: .gallery)
+            return
         }
+
+        self.onFailScanImage(.gallery)
     }
 }
