@@ -410,9 +410,6 @@ open class AMCameraScanner: ScanBaseViewController {
                              imageData: ScannedCardImageData,
                              state: MainLoopState) {
         super.prediction(prediction: prediction, imageData: imageData, state: state)
-        if prediction.isCard {
-            print(prediction)
-        }
         updateRoiView(prediction: prediction)
     }
 
@@ -504,9 +501,9 @@ extension AMCameraScanner: UIImagePickerControllerDelegate, UINavigationControll
             detectedValue = qrContent
             return
         }
-
+        
         if let cgImage = ciImage.cgImage {
-            self.captureImage(image: cgImage)
+            self.galleryImage = cgImage
         }
     }
 }

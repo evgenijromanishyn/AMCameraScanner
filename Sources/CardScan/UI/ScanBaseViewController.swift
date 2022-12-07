@@ -25,6 +25,7 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
         return result
     }()
 
+    var galleryImage: CGImage?
     var includeCardImage = false
     var showDebugImageView = false
 
@@ -423,6 +424,10 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
     }
 
     func captureOutputWork(sampleBuffer: CMSampleBuffer) {
+        if let galleryImage = self.galleryImage {
+            self.captureImage(image: galleryImage)
+            return
+        }
         guard let fullCameraImage = CMSampleBufferGetImageBuffer(sampleBuffer)?.cgImage() else {
             return
         }
