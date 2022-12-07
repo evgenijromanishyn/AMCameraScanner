@@ -479,7 +479,6 @@ extension AMCameraScanner: UIImagePickerControllerDelegate, UINavigationControll
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
 
         var detectedValue: String? = nil
-
         defer {
             self.dismiss(animated: true) {
                 if let value = detectedValue {
@@ -495,13 +494,16 @@ extension AMCameraScanner: UIImagePickerControllerDelegate, UINavigationControll
             return
         }
 
-        guard let detector = CIDetector(ofType: CIDetectorTypeQRCode, context: nil, options: [CIDetectorAccuracy: CIDetectorAccuracyHigh]),
-              let features = detector.features(in: ciImage) as? [CIQRCodeFeature],
-              let qrCodeFeature = features.first,
-              let qrContent = qrCodeFeature.messageString else {
+        if let detector = CIDetector(ofType: CIDetectorTypeQRCode, context: nil, options: [CIDetectorAccuracy: CIDetectorAccuracyHigh]),
+           let features = detector.features(in: ciImage) as? [CIQRCodeFeature],
+           let qrCodeFeature = features.first,
+           let qrContent = qrCodeFeature.messageString {
+            detectedValue = qrContent
             return
         }
 
-        detectedValue = qrContent
+        if let cgImage = ciImage.cgImage {
+            self.captureImage(image: cgImage)
+        }
     }
 }
