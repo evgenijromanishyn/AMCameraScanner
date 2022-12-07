@@ -423,29 +423,26 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
     }
 
     func captureOutputWork(sampleBuffer: CMSampleBuffer) {
-        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+        guard let fullCameraImage = CMSampleBufferGetImageBuffer(sampleBuffer)?.cgImage() else {
             return
         }
 
-        guard let fullCameraImage = pixelBuffer.cgImage() else {
-            return
-        }
+        self.captureImage(image: fullCameraImage)
+    }
 
+    func captureImage(image: CGImage) {
         // confirm videoGravity settings in previewView. Calculations based on .resizeAspectFill
         DispatchQueue.main.async {
             assert(self.previewView?.videoPreviewLayer.videoGravity == .resizeAspectFill)
         }
 
         guard let roiFrame = self.regionOfInterestLabelFrame,
-            let previewViewFrame = self.previewViewFrame,
-            let scannedImageData = ScannedCardImageData(
-                captureDeviceImage: fullCameraImage,
+              let previewViewFrame = self.previewViewFrame,
+              let scannedImageData = ScannedCardImageData(
+                captureDeviceImage: image,
                 viewfinderRect: roiFrame,
                 previewViewRect: previewViewFrame
-            )
-        else {
-            return
-        }
+              ) else { return }
 
         // we allow apps that integrate to supply their own sequence of images
         // for use in testing
