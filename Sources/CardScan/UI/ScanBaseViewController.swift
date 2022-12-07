@@ -17,7 +17,7 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
 
     var galleryImage: UIImage? = nil
 
-    var testingImageDataSource: TestingImageDataSource? = {
+    var testingImageDataSource: TestingImageDataSource? {
         var result: TestingImageDataSource?
         if let image = self.galleryImage {
             result = EndToEndTestingImageDataSource(image: image)
@@ -29,7 +29,7 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
 //            }
 //        #endif
         return result
-    }()
+    }
 
     var includeCardImage = false
     var showDebugImageView = false
