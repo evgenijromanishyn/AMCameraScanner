@@ -17,7 +17,7 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
 
     var galleryImage: UIImage? = nil
 
-    lazy var testingImageDataSource: TestingImageDataSource? = {
+    var testingImageDataSource: TestingImageDataSource? = {
         var result: TestingImageDataSource?
         if let image = self.galleryImage {
             result = EndToEndTestingImageDataSource(image: image)
