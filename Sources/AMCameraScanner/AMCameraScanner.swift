@@ -501,9 +501,10 @@ extension AMCameraScanner: UIImagePickerControllerDelegate, UINavigationControll
             detectedValue = qrContent
             return
         }
-        
+
         if let cgImage = ciImage.cgImage {
             self.galleryImage = cgImage
+            self.resumeScanning()
         }
     }
 }
