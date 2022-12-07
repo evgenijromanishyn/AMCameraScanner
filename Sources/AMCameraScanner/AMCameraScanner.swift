@@ -503,6 +503,7 @@ extension AMCameraScanner: UIImagePickerControllerDelegate, UINavigationControll
         }
 
         self.galleryImage = image
+        self.resumeScanning()
 //        if let cgImage = ciImage.cgImage {
 //            self.resumeScanning()
 //        }
