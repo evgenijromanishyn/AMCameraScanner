@@ -2,34 +2,13 @@ import AVKit
 import UIKit
 import Vision
 
-protocol TestingImageDataSource: AnyObject {
-    func nextSquareAndFullImage() -> CGImage?
-}
-
 public enum ImageourceType {
     case outside
     case gallery
 }
 
 open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate,
-                              AfterPermissions, OcrMainLoopDelegate
-{
-
-    var galleryImage: UIImage? = nil
-
-    var testingImageDataSource: TestingImageDataSource? {
-        var result: TestingImageDataSource?
-        if let image = self.galleryImage {
-            result = EndToEndTestingImageDataSource(image: image)
-        }
-
-//        #if targetEnvironment(simulator)
-//            if ProcessInfo.processInfo.environment["UITesting"] != nil {
-//                result = EndToEndTestingImageDataSource()
-//            }
-//        #endif
-        return result
-    }
+                              AfterPermissions, OcrMainLoopDelegate {
 
     var includeCardImage = false
     var showDebugImageView = false
@@ -220,49 +199,6 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
         self.videoFeed.requestCameraAccess(permissionDelegate: self)
     }
 
-    internal func invokeFakeLoop() {
-        guard let dataSource = testingImageDataSource else {
-            return
-        }
-
-        guard let fullTestingImage = dataSource.nextSquareAndFullImage() else {
-            return
-        }
-
-        guard let roiFrame = self.regionOfInterestLabelFrame,
-            let previewViewFrame = self.previewViewFrame,
-            let roiRectInPixels = ScannedCardImageData.convertToPreviewLayerRect(
-                captureDeviceImage: fullTestingImage,
-                viewfinderRect: roiFrame,
-                previewViewRect: previewViewFrame
-            )
-        else {
-            return
-        }
-
-        mainLoop?.push(
-            imageData: ScannedCardImageData(
-                previewLayerImage: fullTestingImage,
-                previewLayerViewfinderRect: roiRectInPixels
-            )
-        )
-    }
-
-    internal func startFakeCameraLoop() {
-        let timer = Timer(timeInterval: 0.1, repeats: true) { [weak self] _ in
-            self?.invokeFakeLoop()
-        }
-        RunLoop.main.add(timer, forMode: .default)
-    }
-
-    func isSimulator() -> Bool {
-        #if targetEnvironment(simulator)
-            return true
-        #else
-            return false
-        #endif
-    }
-
     func setupOnViewDidLoad(regionOfInterestLabel: UIView,
                             blurView: BlurView,
                             previewView: PreviewView,
@@ -290,10 +226,6 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
 
         mainLoop = createOcrMainLoop()
 
-        if testingImageDataSource != nil {
-            self.ocrMainLoop()?.imageQueueSize = 20
-        }
-
         self.ocrMainLoop()?.mainLoopDelegate = self
         self.previewView?.videoPreviewLayer.session = self.videoFeed.session
 
@@ -312,10 +244,6 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
                 }
                 if let level = torchLevel {
                     self.setTorchLevel(level: level)
-                }
-
-                if !success && self.testingImageDataSource != nil && self.isSimulator() {
-                    self.startFakeCameraLoop()
                 }
             }
         )
@@ -429,11 +357,7 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
     }
 
     func captureOutputWork(sampleBuffer: CMSampleBuffer) {
-        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-            return
-        }
-
-        guard let fullCameraImage = pixelBuffer.cgImage() else {
+        guard let fullCameraImage = CMSampleBufferGetImageBuffer(sampleBuffer)?.cgImage() else {
             return
         }
 
@@ -453,21 +377,7 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
             return
         }
 
-        // we allow apps that integrate to supply their own sequence of images
-        // for use in testing
-        if let dataSource = testingImageDataSource {
-            guard let fullTestingImage = dataSource.nextSquareAndFullImage() else {
-                return
-            }
-            mainLoop?.push(
-                imageData: ScannedCardImageData(
-                    previewLayerImage: fullTestingImage,
-                    previewLayerViewfinderRect: CGRect(x: 0, y: 0, width: fullCameraImage.width, height: fullCameraImage.height)
-                )
-            )
-        } else {
-            mainLoop?.push(imageData: scannedImageData)
-        }
+        mainLoop?.push(imageData: scannedImageData)
     }
 
     func updateDebugImageView(image: UIImage) {

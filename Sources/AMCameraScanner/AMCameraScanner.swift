@@ -499,13 +499,6 @@ extension AMCameraScanner: UIImagePickerControllerDelegate, UINavigationControll
            let qrCodeFeature = features.first,
            let qrContent = qrCodeFeature.messageString {
             detectedValue = qrContent
-            return
         }
-
-        self.galleryImage = image
-        self.resumeScanning()
-//        if let cgImage = ciImage.cgImage {
-//            self.resumeScanning()
-//        }
     }
 }
