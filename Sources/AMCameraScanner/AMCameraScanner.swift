@@ -410,8 +410,8 @@ open class AMCameraScanner: ScanBaseViewController {
                              imageData: ScannedCardImageData,
                              state: MainLoopState) {
         super.prediction(prediction: prediction, imageData: imageData, state: state)
-        if prediction.isCard, let value = prediction.number {
-            print(value)
+        if prediction.isCard {
+            print(prediction)
         }
         updateRoiView(prediction: prediction)
     }
