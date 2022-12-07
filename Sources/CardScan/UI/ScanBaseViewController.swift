@@ -462,7 +462,7 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
             mainLoop?.push(
                 imageData: ScannedCardImageData(
                     previewLayerImage: fullTestingImage,
-                    previewLayerViewfinderRect: roiFrame
+                    previewLayerViewfinderRect: CGRect(x: 0, y: 0, width: fullCameraImage.width, height: fullCameraImage.height)
                 )
             )
         } else {
