@@ -15,17 +15,22 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
                               AfterPermissions, OcrMainLoopDelegate
 {
 
+    var galleryImage: UIImage? = nil
+
     lazy var testingImageDataSource: TestingImageDataSource? = {
         var result: TestingImageDataSource?
-        #if targetEnvironment(simulator)
-            if ProcessInfo.processInfo.environment["UITesting"] != nil {
-                //result = EndToEndTestingImageDataSource()
-            }
-        #endif  // targetEnvironment(simulator)
+        if let image = self.galleryImage {
+            result = EndToEndTestingImageDataSource(image: image)
+        }
+
+//        #if targetEnvironment(simulator)
+//            if ProcessInfo.processInfo.environment["UITesting"] != nil {
+//                result = EndToEndTestingImageDataSource()
+//            }
+//        #endif
         return result
     }()
 
-    var galleryImage: CGImage?
     var includeCardImage = false
     var showDebugImageView = false
 
@@ -424,30 +429,29 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
     }
 
     func captureOutputWork(sampleBuffer: CMSampleBuffer) {
-        if let galleryImage = self.galleryImage {
-            self.captureImage(image: galleryImage)
-            return
-        }
-        guard let fullCameraImage = CMSampleBufferGetImageBuffer(sampleBuffer)?.cgImage() else {
+        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
             return
         }
 
-        self.captureImage(image: fullCameraImage)
-    }
+        guard let fullCameraImage = pixelBuffer.cgImage() else {
+            return
+        }
 
-    func captureImage(image: CGImage) {
         // confirm videoGravity settings in previewView. Calculations based on .resizeAspectFill
         DispatchQueue.main.async {
             assert(self.previewView?.videoPreviewLayer.videoGravity == .resizeAspectFill)
         }
 
         guard let roiFrame = self.regionOfInterestLabelFrame,
-              let previewViewFrame = self.previewViewFrame,
-              let scannedImageData = ScannedCardImageData(
-                captureDeviceImage: image,
+            let previewViewFrame = self.previewViewFrame,
+            let scannedImageData = ScannedCardImageData(
+                captureDeviceImage: fullCameraImage,
                 viewfinderRect: roiFrame,
                 previewViewRect: previewViewFrame
-              ) else { return }
+            )
+        else {
+            return
+        }
 
         // we allow apps that integrate to supply their own sequence of images
         // for use in testing
