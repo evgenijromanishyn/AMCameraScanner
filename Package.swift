@@ -28,7 +28,7 @@ let package = Package(
             exclude: ["Info.plist"],
             resources: [
                 .process("Info.plist"),
-                .process("Resources/CompiledModels")
+                .process("Resources")
             ]),
     ]
 )
