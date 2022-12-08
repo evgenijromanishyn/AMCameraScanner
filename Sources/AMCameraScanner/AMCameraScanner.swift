@@ -378,7 +378,7 @@ open class AMCameraScanner: ScanBaseViewController {
 
     override open func onFailScanImage(_ sourceType: ImageourceType) {}
 
-    override func onScannedCard(number: String,
+    override open func onScannedCard(number: String,
                                 expiryYear: String?,
                                 expiryMonth: String?,
                                 scannedImage: UIImage?) {
