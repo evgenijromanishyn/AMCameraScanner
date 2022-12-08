@@ -95,7 +95,7 @@ import UIKit
 
     private func loadModel() {
         guard
-            let ssdOcrUrl = StripeCardScanBundleLocator.resourcesBundle.url(
+            let ssdOcrUrl = Bundle.main.url(
                 forResource: SSDOcrDetect.ssdOcrResource,
                 withExtension: SSDOcrDetect.ssdOcrExtension
             )
