@@ -99,7 +99,7 @@ struct CreditCardOcrPrediction {
             isCard: self.isCard,
             expiryMonth: self.expiryMonth,
             expiryYear: self.expiryYear,
-            name: "orc",//self.name,
+            name: self.name,
             computationTime: self.computationTime,
             numberBoxes: self.numberBoxes,
             expiryBoxes: self.expiryBoxes,
