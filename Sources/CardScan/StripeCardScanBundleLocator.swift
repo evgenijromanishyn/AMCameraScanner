@@ -9,11 +9,11 @@
 import Foundation
 
 /// :nodoc:
-final class StripeCardScanBundleLocator: BundleLocatorProtocol {
-    static let internalClass: AnyClass = StripeCardScanBundleLocator.self
+final class AMCameraScannerBundle: BundleLocatorProtocol {
+    static let internalClass: AnyClass = AMCameraScannerBundle.self
     static let bundleName = "AMCameraScanner"
     #if SWIFT_PACKAGE
         static let spmResourcesBundle = Bundle.module
     #endif
-    static let resourcesBundle = StripeCardScanBundleLocator.computeResourcesBundle()
+    static let resourcesBundle = AMCameraScannerBundle.computeResourcesBundle()
 }

@@ -25,7 +25,7 @@ class UxAnalyzer: CreditCardOcrImplementation {
     }
 
     static func loadModelFromBundle() -> UxModel? {
-        let bundle = StripeCardScanBundleLocator.resourcesBundle
+        let bundle = AMCameraScannerBundle.resourcesBundle
         guard let url = bundle.url(forResource: "UxModel", withExtension: "mlmodelc") else {
             return nil
         }

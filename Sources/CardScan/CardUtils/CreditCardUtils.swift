@@ -259,7 +259,7 @@ struct CreditCardUtils {
             cardTypes = cardTypeMap
         } else {
             guard
-                let filePath = StripeCardScanBundleLocator.resourcesBundle.path(
+                let filePath = AMCameraScannerBundle.resourcesBundle.path(
                     forResource: "card_types",
                     ofType: "txt"
                 )

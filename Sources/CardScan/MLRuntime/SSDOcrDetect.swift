@@ -68,7 +68,7 @@ import UIKit
 
     @_spi(STP) public static func loadModelFromBundle() -> SSDOcr? {
         guard
-            let ssdOcrUrl = StripeCardScanBundleLocator.resourcesBundle.url(
+            let ssdOcrUrl = AMCameraScannerBundle.resourcesBundle.url(
                 forResource: SSDOcrDetect.ssdOcrResource,
                 withExtension: SSDOcrDetect.ssdOcrExtension
             )
@@ -95,7 +95,7 @@ import UIKit
 
     private func loadModel() {
         guard
-            let ssdOcrUrl = StripeCardScanBundleLocator.resourcesBundle.url(
+            let ssdOcrUrl = AMCameraScannerBundle.resourcesBundle.url(
                 forResource: SSDOcrDetect.ssdOcrResource,
                 withExtension: SSDOcrDetect.ssdOcrExtension
             )
