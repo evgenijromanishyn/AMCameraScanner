@@ -1,5 +1,5 @@
 //
-//  StripeCardScanBundleLocator.swift
+//  AMCameraScannerBundle.swift
 //  StripeCardScan
 //
 //  Created by Sam King on 11/10/21.
