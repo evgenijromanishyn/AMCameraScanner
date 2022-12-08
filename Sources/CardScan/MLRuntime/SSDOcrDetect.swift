@@ -94,6 +94,19 @@ import UIKit
     }
 
     private func loadModel() {
+        print(AMCameraScannerBundle.resourcesBundle.resourcePath)
+        if let files = try? FileManager.default.contentsOfDirectory(atPath: AMCameraScannerBundle.resourcesBundle.bundlePath ){
+            for file in files {
+                print(file)
+            }
+        }
+
+        if let files = try? FileManager.default.contentsOfDirectory(atPath: Bundle.main.bundlePath ){
+            for file in files {
+                print(file)
+            }
+        }
+
         guard
             let ssdOcrUrl = AMCameraScannerBundle.resourcesBundle.url(
                 forResource: SSDOcrDetect.ssdOcrResource,
