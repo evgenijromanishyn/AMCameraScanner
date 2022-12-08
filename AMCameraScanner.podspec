@@ -77,7 +77,7 @@ Pod::Spec.new do |spec|
   #  Not including the public_header_files will make all headers public.
   #
 
-  spec.source_files  = "Sources/**/*.{h,m,swift,mlmodelc}"
+  spec.source_files  = "Sources/**/*.{h,m,swift}"
   spec.resource_bundles = {
     'AMCameraScannerBundle' => ['Sources/**/*.{mlmodelc}'],
   }
