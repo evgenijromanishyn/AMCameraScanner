@@ -82,7 +82,7 @@ class AppleCreditCardOcr: CreditCardOcrImplementation {
             isCard: hasNumbers,
             expiryMonth: expiryMonth,
             expiryYear: expiryYear,
-            name: "apple", //name,
+            name: name,
             computationTime: duration,
             numberBoxes: numberBox.map { [$0] },
             expiryBoxes: expiryBox.map { [$0] },

@@ -45,7 +45,7 @@ class SSDCreditCardOcr: CreditCardOcrImplementation {
             isCard: hasNumbers,
             expiryMonth: nil,
             expiryYear: nil,
-            name: nil,
+            name: "ssd",//nil,
             computationTime: duration,
             numberBoxes: numberBoxes,
             expiryBoxes: nil,
