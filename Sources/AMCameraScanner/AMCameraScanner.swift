@@ -396,6 +396,9 @@ open class AMCameraScanner: ScanBaseViewController {
 
         completedAnimation = false
 
+        if !prediction.isCard {
+            print(prediction)
+        }
         roiViewQR.isActive = !prediction.isCard
         roiViewCard.isActive = prediction.isCard
 
