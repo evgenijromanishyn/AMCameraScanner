@@ -48,6 +48,7 @@ extension BundleLocatorProtocol {
         #endif
 
         if ourBundle == nil {
+            print(bundleName)
             ourBundle = Bundle(path: "\(bundleName).bundle")
         }
 
