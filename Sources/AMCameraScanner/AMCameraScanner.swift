@@ -397,7 +397,7 @@ open class AMCameraScanner: ScanBaseViewController {
         completedAnimation = false
 
         if prediction.isCard {
-            print(prediction.number)
+            print(prediction.number ?? "Empty number")
         } else {
             print(prediction)
         }
