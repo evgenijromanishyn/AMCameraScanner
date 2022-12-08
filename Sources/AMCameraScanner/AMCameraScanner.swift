@@ -449,8 +449,7 @@ open class AMCameraScanner: ScanBaseViewController {
     /// Warning: if the user navigates to settings and updates the setting, it'll suspend your app.
     @objc func enableCameraPermissionsPress() {
         guard let settingsUrl = URL(string: UIApplication.openSettingsURLString),
-            UIApplication.shared.canOpenURL(settingsUrl)
-        else {
+              UIApplication.shared.canOpenURL(settingsUrl) else {
             return
         }
 
