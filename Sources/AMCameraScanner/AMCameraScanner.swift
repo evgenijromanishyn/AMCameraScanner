@@ -25,18 +25,17 @@ open class AMCameraScanner: ScanBaseViewController {
 
     var closeButton: UIButton = {
         var button = UIButton(type: .system)
-        button.setImage(UIImage(named: "chevronLeft", in: AMCameraScannerBundle.computeResourcesBundle(), with: nil), for: .normal)
+        button.setImage(UIImage.chevronLeft, for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.tintColor = .white
         return button
     }()
 
-    var flashButton = UIButton(type: .custom)
-
-    open var flashOn: UIImage?
-    open var flashOff: UIImage? {
-        didSet { flashButton.setImage(flashOff, for: .normal) }
-    }
+    var flashButton: UIButton = {
+        var button = UIButton(type: .custom)
+        button.setImage(UIImage.flashOff, for: .normal)
+        return button
+    }()
 
     var galleryButton = UIButton(type: .custom)
     
@@ -432,7 +431,7 @@ open class AMCameraScanner: ScanBaseViewController {
     @objc func flashButtonPress() {
         toggleTorch()
 
-        let flashImage = self.isTorchOn() ? flashOn : flashOff
+        let flashImage = self.isTorchOn() ? UIImage.flashOn : UIImage.flashOff
         flashButton.setImage(flashImage, for: .normal)
     }
 
