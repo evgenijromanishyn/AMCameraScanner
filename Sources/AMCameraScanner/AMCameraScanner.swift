@@ -25,6 +25,7 @@ open class AMCameraScanner: ScanBaseViewController {
 
     var closeButton: UIButton = {
         var button = UIButton(type: .system)
+        button.setImage(UIImage(named: "chevronLeft"), for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.tintColor = .white
         return button
