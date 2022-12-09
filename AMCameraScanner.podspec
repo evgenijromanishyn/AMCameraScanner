@@ -81,6 +81,7 @@ Pod::Spec.new do |spec|
   spec.resource_bundles = {
     'AMCameraScannerBundle' => ['Sources/**/*.{mlmodelc}', 'Assets/*.pdf', 'Assets/*.xcassets'],
   }
+  s.resources = ['Sources/Assets/*.{xcassets}']
   spec.swift_version = "5.2"
 
 end
