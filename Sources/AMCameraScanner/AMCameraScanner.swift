@@ -427,7 +427,7 @@ open class AMCameraScanner: ScanBaseViewController {
     }
 
     // MARK: -UI event handlers
-    @objc public func cancelButtonPress() {
+    @objc open func cancelButtonPress() {
         delegate?.userDidCancelSimple(self)
         self.cancelScan()
     }
