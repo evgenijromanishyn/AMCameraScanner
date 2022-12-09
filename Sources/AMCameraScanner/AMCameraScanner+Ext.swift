@@ -13,4 +13,5 @@ public extension AMCameraScanner {
         get { descriptionText.text }
         set { descriptionText.text = newValue }
     }
+    
 }

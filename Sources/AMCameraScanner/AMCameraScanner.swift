@@ -37,7 +37,11 @@ open class AMCameraScanner: ScanBaseViewController {
         return button
     }()
 
-    var galleryButton = UIButton(type: .custom)
+    var galleryButton: UIButton = {
+        var button = UIButton(type: .custom)
+        button.setImage(UIImage.galleryIcon, for: .normal)
+        return button
+    }()
     
     private var debugView: UIImageView?
     var enableCameraPermissionsButton = UIButton(type: .system)
@@ -423,7 +427,7 @@ open class AMCameraScanner: ScanBaseViewController {
     }
 
     // MARK: -UI event handlers
-    @objc func cancelButtonPress() {
+    @objc public func cancelButtonPress() {
         delegate?.userDidCancelSimple(self)
         self.cancelScan()
     }
