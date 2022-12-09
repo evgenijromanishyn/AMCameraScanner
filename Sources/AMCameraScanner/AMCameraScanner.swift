@@ -25,7 +25,7 @@ open class AMCameraScanner: ScanBaseViewController {
 
     var closeButton: UIButton = {
         var button = UIButton(type: .system)
-        button.setImage(UIImage(named: "chevronLeft"), for: .normal)
+        button.setImage(UIImage(named: "chevronLeft", in: AMCameraScannerBundle.computeResourcesBundle(), with: nil), for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.tintColor = .white
         return button
@@ -397,11 +397,6 @@ open class AMCameraScanner: ScanBaseViewController {
 
         completedAnimation = false
 
-        if prediction.isCard {
-            //print(prediction.number ?? "Empty number")
-        } else {
-            print(prediction.name ?? "Empty name")
-        }
         roiViewQR.isActive = !prediction.isCard
         roiViewCard.isActive = prediction.isCard
 
