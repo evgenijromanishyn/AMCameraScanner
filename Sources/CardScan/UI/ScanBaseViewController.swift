@@ -196,8 +196,7 @@ open class ScanBaseViewController: UIViewController, AVCaptureVideoDataOutputSam
     // you must call setupOnViewDidLoad before calling this function and you have to call
     // this function to get the camera going
     func startCameraPreview() {
-        //self.videoFeed.requestCameraAccess(permissionDelegate: self)
-        self.ocrMainLoop()?.scanStats.permissionGranted = true
+        self.videoFeed.requestCameraAccess(permissionDelegate: self)
     }
 
     func setupOnViewDidLoad(regionOfInterestLabel: UIView,
