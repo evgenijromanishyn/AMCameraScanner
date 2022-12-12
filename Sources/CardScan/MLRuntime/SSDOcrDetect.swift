@@ -136,7 +136,7 @@ import UIKit
             return nil
         }
 
-        let result: Result = PredictionUtilOcr().predictionUtil(
+        let result: PredictionAPIResult = PredictionUtilOcr().predictionUtil(
             scores: scores,
             boxes: boxes,
             probThreshold: probThreshold,

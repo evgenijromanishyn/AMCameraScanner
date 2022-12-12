@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Result {
+struct PredictionAPIResult {
     var pickedBoxProbs: [Float]
     var pickedLabels: [Int]
     var pickedBoxes: [[Float]]
@@ -31,7 +31,7 @@ struct PredictionAPI {
         iouThreshold: Float,
         candidateSize: Int,
         topK: Int
-    ) -> Result {
+    ) -> PredictionAPIResult {
         var pickedBoxes: [[Float]] = [[Float]]()
         var pickedLabels: [Int] = [Int]()
         var pickedBoxProbs: [Float] = [Float]()
@@ -66,7 +66,7 @@ struct PredictionAPI {
                 pickedLabels.append(classIndex)
             }
         }
-        var result: Result = Result()
+        var result: PredictionAPIResult = PredictionAPIResult()
         result.pickedBoxProbs = pickedBoxProbs
         result.pickedLabels = pickedLabels
         result.pickedBoxes = pickedBoxes

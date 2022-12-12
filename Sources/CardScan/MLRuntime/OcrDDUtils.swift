@@ -39,7 +39,7 @@ struct OcrDDUtils {
         if aggregateDeviation > offsetQuickRead * medianHeight {
             let quickReadGroups = allBoxes.allBoxes
                 .sorted(by: { return $0.rect.centerY() < $1.rect.centerY() })
-                .chunked(into: 4)
+                .chunkedArray(into: 4)
                 .map { $0.sorted(by: { return $0.rect.centerX() < $1.rect.centerX() }) }
 
             guard let quickReadGroupFirstRowFirstDigit = quickReadGroups[0].first,

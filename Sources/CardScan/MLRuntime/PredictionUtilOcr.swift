@@ -20,7 +20,7 @@ struct PredictionUtilOcr {
         iouThreshold: Float,
         candidateSize: Int,
         topK: Int
-    ) -> Result {
+    ) -> PredictionAPIResult {
         var pickedBoxes = [[Float]]()
         var pickedLabels = [Int]()
         var pickedBoxProbs = [Float]()
@@ -56,7 +56,7 @@ struct PredictionUtilOcr {
             }
 
         }
-        var result: Result = Result()
+        var result: PredictionAPIResult = PredictionAPIResult()
         result.pickedBoxProbs = pickedBoxProbs
         result.pickedLabels = pickedLabels
         result.pickedBoxes = pickedBoxes
